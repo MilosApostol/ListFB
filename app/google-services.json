@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "672514826326",
+    "firebase_url": "https://fir-e93b7-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "fir-e93b7",
+    "storage_bucket": "fir-e93b7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:672514826326:android:7aa4dc5383476a74161bf7",
+        "android_client_info": {
+          "package_name": "com.example.listfirebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmKuFRcX6MSeij8yRn6_EOEDHM5TD3wrk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
