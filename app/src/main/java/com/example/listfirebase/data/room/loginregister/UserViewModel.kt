@@ -1,14 +1,8 @@
 package com.example.listfirebase.data.room.loginregister
 
-import android.content.Context
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import com.example.listfirebase.session.UserSessionManager
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,15 +13,45 @@ import javax.inject.Inject
 @HiltViewModel
 class UserViewModel @Inject constructor(
     val userRepository: UserRepository,
-    private val userSessionManager: UserSessionManager,
+    val userSessionManager: UserSessionManager,
 ) : ViewModel() {
+
+    //userSession not working well
+
+
+    suspend fun loggingState(): Boolean {
+        return withContext(Dispatchers.IO) {
+            val loggedInUser = userRepository.getUserByLoggedInStatus()
+            if (loggedInUser != null) {
+                userSessionManager.currentUser = loggedInUser
+                userSessionManager.isUserLoggedIn.value = true
+                true
+            } else {
+                false
+            }
+        }
+    }
+
 
     suspend fun getUserByUserNameAndPass(userEmail: String, userPassword: String): Boolean {
         return withContext(Dispatchers.IO) {
             val user = userRepository.getUserByName(userEmail)
-            userSessionManager.setUser(user = user)
-            user.let {
-                return@withContext it.userPassword == userPassword
+            if (user != null) {
+                userSessionManager.currentUser = user
+                userSessionManager.isUserLoggedIn.value = true
+                userRepository.updateUser(user.copy(isLoggedIn = true))  // Update in database
+                return@withContext user.userPassword == userPassword
+            } else {
+                false
+            }
+        }
+    }
+
+    suspend fun getUserId() {
+        viewModelScope.launch {
+            val currentUser = userRepository.getUserByLoggedInStatus()
+            if (currentUser != null) {
+                userSessionManager.currentUser = currentUser
             }
         }
     }
@@ -40,40 +64,23 @@ class UserViewModel @Inject constructor(
         return userRepository.getUserByName(userName)
     }
 
-    //not working
-/*
-    fun user(context: Context) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val user = userSessionManager.getUser()
-            val newId = Firebase.auth.currentUser?.uid
-            val oldId = user.userId ?: ""
-            userRepository.updateUserId(oldId, newId!!)
-        }
-    }
-
-
- */
-
     suspend fun insertUser(user: UserEntity) {
         userRepository.insertUser(user)
         userSessionManager.apply {
             setUserLoggedIn(true)
-            setUser(user)
+            userSessionManager.currentUser = user
         }
     }
-
-
-    fun getUserById(userId: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val savedUser = userRepository.getUserById(userId)
-            userSessionManager.setUser(savedUser)
-        }
-    }
-
-    fun logout() {
+    suspend fun logout() {
         viewModelScope.launch {
-            userRepository.logout()
+            val user = userSessionManager.currentUser!!
+            userRepository.updateUser(user.copy(isLoggedIn = false))
+            userSessionManager.clearSession()
         }
+    }
+
+    suspend fun updateHolderId(username: String): Boolean {
+        return userRepository.updateRoomUserIdAfterLogin(username)
     }
 
     suspend fun updateRoomUserIdAfterLogin(username: String): Boolean {

@@ -30,4 +30,11 @@ abstract class LoginDao {
 
     @Query("UPDATE user_table SET userId = :newUserId WHERE userId = :oldUserId")
     abstract fun updateUserId(oldUserId: String, newUserId: String)
+
+    @Query("UPDATE user_table SET userHolderId = :userId WHERE userHolderId = :holderId")
+    abstract fun updateHolderId(userId: String, holderId: String)
+
+    //going trough all isLoggedIN and looking for the one which was signed IN
+    @Query("SELECT * FROM user_table WHERE isLoggedIn = :isLoggedIn LIMIT 1")
+    abstract fun getUserByLoggedInStatus(isLoggedIn: Boolean): UserEntity?
 }

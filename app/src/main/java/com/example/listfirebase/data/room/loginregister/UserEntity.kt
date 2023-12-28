@@ -11,6 +11,8 @@ data class UserEntity(
     @ColumnInfo(name = "userId")
     var userId: String = UUID.randomUUID().toString(),
     val userEmail: String = "",
-    val userPassword: String = ""
+    val userPassword: String = "",
+    val userHolderId: String = "",
+    val isLoggedIn: Boolean = false
 ) {
 }

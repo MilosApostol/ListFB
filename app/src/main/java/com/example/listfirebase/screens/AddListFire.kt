@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +38,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,8 +53,13 @@ fun AddListFire(
     var listName by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     val db = Firebase.database
-    val usersRef = db.getReference("users")
+    var firebaseUserId = Firebase.auth.currentUser!!.uid ?: ""
+    if (firebaseUserId == null){
+        firebaseUserId = " "
+    }
 
+    val usersRef = db.getReference("users")
+    val scope = rememberCoroutineScope()
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(text = "AddListScreen") },
@@ -76,42 +84,71 @@ fun AddListFire(
                 Button(
                     onClick = {
                         if (id.isEmpty()) {
-//TODO update
+//TODO update Screen
                         } else {
                             if (listName.isNotEmpty()) {
                                 if (listViewModel.isNetworkAvailable()) {
                                     val reference =
                                         FirebaseDatabase.getInstance().getReference(Constants.Lists)
                                             .child(
-                                                FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                                                FirebaseAuth.getInstance().currentUser?.uid
+                                                    ?: ""
                                             )
                                     val key = reference.key!!
+                                    try {
+                                        val list = ListEntity(
+                                            listName = listName,
+                                            id = UUID.randomUUID().toString(),
+                                            listCreatorId = firebaseUserId
+                                        )
+                                        val newRef = reference.push()
+                                            .setValue(list) { error, ref ->
+                                                val key = ref.key
+                                                Toast.makeText(context, "$key", Toast.LENGTH_LONG)
+                                                    .show()
+                                                list.id = key!!
+
+                                                listViewModel.saveData(ref, list, key)
+                                            }
+                                        scope.launch {
+                                            if (listRoomViewModel.insertList(
+                                                    list
+                                                )
+                                            ) {
+                                                navController.navigate(
+                                                    Screens.ListScreenFire.name
+                                                            + "/$id"
+                                                )
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+
+                                    }
+                                } else {
                                     val list = ListEntity(
                                         listName = listName,
-                                        id = "temporary_id",
-                                        listCreatorId = Firebase.auth.currentUser!!.uid
+                                        id = UUID.randomUUID().toString(),
                                     )
-                                    navController.navigate(Screens.ListScreenFire.name + "/$id")
-                                    val newRef = reference.push()
-                                        .setValue(list) { error, ref ->
-                                            val key = ref.key
-                                            Toast.makeText(context, "$key", Toast.LENGTH_LONG)
-                                                .show()
-                                            list.id = key!!
+                                    scope.launch {
 
-                                            listViewModel.saveData(ref, list, key)
-                                        listRoomViewModel.insertList(ListEntity(listName))//you have problem with ID
+                                        if (listRoomViewModel.insertList(
+                                                list
+                                            )
+                                        ) {
+                                            navController.navigate(
+                                                Screens.ListScreenFire.name
+                                                        + "/$id"
+                                            )
+
                                         }
-                                    navController.navigate(Screens.ListScreenFire.name + "/$id")
-                                } else {
-                                    Log.e("AddList", "Failed to get key after saving to Firebase")
+                                    }
                                 }
+
                             } else {
-                       listRoomViewModel.insertList(ListEntity(listName))//you have problem with ID
+                                Toast.makeText(context, "add value", Toast.LENGTH_LONG).show()
                             }
                         }
-
-                    }){
+                    }) {
                     Text(text = "Click")
                 }
             }

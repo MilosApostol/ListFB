@@ -11,7 +11,7 @@ import com.example.listfirebase.data.room.loginregister.UserEntity
 
 @Database(
     entities = [UserEntity::class, ListEntity::class, ItemsEntity::class],
-    version = 5,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

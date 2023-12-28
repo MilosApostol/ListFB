@@ -17,10 +17,6 @@ class UserRepository
         userDao.insertUser(userEntity)
     }
 
-    suspend fun updateUser(userEntity: UserEntity) {
-        userDao.updateUser(userEntity)
-    }
-
     suspend fun getUserById(userId: String): UserEntity {
         return userDao.getUserById(userId)
     }
@@ -29,10 +25,19 @@ class UserRepository
         return userDao.getUserByName(userEmail)
     }
 
-    suspend fun logout() {
-        userSessionManager.clearSession()
+
+    //going trough all isLoggedIN and looking for the one which was signed IN
+    suspend fun getUserByLoggedInStatus(): UserEntity? {
+        return withContext(Dispatchers.IO) {
+            userDao.getUserByLoggedInStatus(true)
+        }
     }
 
+    suspend fun updateUser(user: UserEntity) {
+        withContext(Dispatchers.IO) {
+            userDao.updateUser(user)
+        }
+    }
     suspend fun userExist(email: String): Boolean {
         return userDao.checkUserExists(email).first()
     }
@@ -41,6 +46,22 @@ class UserRepository
         userDao.updateUserId(newUserId, oldUserId)
     }
 
+    suspend fun updateHolderId(username: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val firebaseUserId = userDao.getUserByName(username)
+                val existingUser = userDao.getUserByName(username)
+
+                if (existingUser != null) {
+                    userDao.updateHolderId(existingUser.userId, existingUser.userHolderId)
+                }
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+    }
 
     //works
     suspend fun updateRoomUserIdAfterLogin(username: String): Boolean {

@@ -12,11 +12,7 @@ class UserSessionManager {
         false
     )
 
-    fun setUser(user: UserEntity){
-        this.currentUser = user
-    }
-
-    fun getUserId(): String{
+    fun getUserId(): String {
         return currentUser?.userId ?: ""
     }
 

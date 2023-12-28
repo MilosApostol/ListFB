@@ -37,18 +37,17 @@ class RegisterViewModel @Inject constructor(
     private suspend fun getUserByUsername(userName: String): UserEntity {
         return userRepository.getUserByName(userName)
     }
-
+//update I  dont think this works
     // if the user is logged, if yes set userID to firebaseUserId , then you can find your user in ROOM
+
     fun isUserLoggedIn(): Boolean {
         return if (auth.currentUser != null) {
-        //    userRepository.getUserById(Firebase.auth.currentUser!!.uid)
             userSessionManager.setUserId(Firebase.auth.currentUser!!.uid)
             true
         } else {
             false
         }
     }
-
     suspend fun onSignUp(email: String, password: String, navController: NavController, key: String) {
         if (!isNetworkAvailable()) {
 
