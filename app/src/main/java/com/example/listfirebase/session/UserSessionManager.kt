@@ -28,6 +28,9 @@ class UserSessionManager {
         isUserLoggedIn.value = loggedIn
     }
 
+    fun signout(){
+        clearSession()
+    }
      fun clearSession(){
         isUserLoggedIn.value = false
         currentUser = null

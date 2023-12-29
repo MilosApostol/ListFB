@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.listfirebase.data.firebasedata.listfirebase.ListEntity
 
@@ -28,7 +30,8 @@ fun ListItems(
     modifier: Modifier = Modifier,
     onRenameClick: () -> Unit = {},
     onTextClick: () -> Unit = {},
-    onDeleteClick: () -> Unit = {}
+    onDeleteClick: () -> Unit = {},
+    onDotsClick: () -> Unit = {}
 ) {
     Card(
         modifier = modifier
@@ -48,8 +51,7 @@ fun ListItems(
                     .padding(end = 8.dp)
                     .clickable {
                         onTextClick()
-                    },
-                contentAlignment = Alignment.CenterStart
+                    }, contentAlignment = Alignment.CenterStart
             ) {
                 Text(
                     text = list.listName,
@@ -57,29 +59,10 @@ fun ListItems(
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-
-            Icon(
-                imageVector = Icons.Filled.DriveFileRenameOutline,
-                contentDescription = "Rename",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .clickable {
-                        onRenameClick()
-                    }
-            )
-            Icon(
-                imageVector = Icons.Filled.Delete,
-                contentDescription = "Rename",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .clickable {
-                        onDeleteClick()
-                    }
-            )
+            Icon(imageVector = Icons.Default.MoreVert,
+                contentDescription = null,
+                tint = Color.Black,
+                modifier = Modifier.clickable { onDotsClick() })
 
 
         }

@@ -92,81 +92,74 @@ fun RegisterScreenFire(
                     )
                 }
 
-                    Card(
-                        modifier = cardModifier,
-                        elevation = 8.dp,
-                        shape = RoundedCornerShape(16.dp)
-                    )
-                    {
-                        TextFieldLookPassword(
-                            text = password,
-                            label = "Password",
-                            visible = passwordVisible,
-                            leadingIcon = Icons.Default.Lock,
-                            trailingIconStart = Icons.Default.VisibilityOff,
-                            trailingIconEnd = Icons.Default.Visibility,
-                            onTextChange = { password = it },
-                            onClick = { passwordVisible = !passwordVisible })
-                    }
-                    Button(
-                        onClick = {
-                            if (email.isEmpty() && password.isEmpty()) {
-                                Toast.makeText(context, "please add value", Toast.LENGTH_LONG)
-                                    .show()
-                            } else {
-                                scope.launch {
-                                    val userExist = userViewModel.userExist(email)
-                                    if (userExist) {
-                                        Toast.makeText(context, "pickanother", Toast.LENGTH_LONG)
-                                            .show()
+                Card(
+                    modifier = cardModifier,
+                    elevation = 8.dp,
+                    shape = RoundedCornerShape(16.dp)
+                )
+                {
+                    TextFieldLookPassword(
+                        text = password,
+                        label = "Password",
+                        visible = passwordVisible,
+                        leadingIcon = Icons.Default.Lock,
+                        trailingIconStart = Icons.Default.VisibilityOff,
+                        trailingIconEnd = Icons.Default.Visibility,
+                        onTextChange = { password = it },
+                        onClick = { passwordVisible = !passwordVisible })
+                }
+                Button(
+                    onClick = {
+                        if (email.isEmpty() && password.isEmpty()) {
+                            Toast.makeText(context, "please add value", Toast.LENGTH_LONG)
+                                .show()
+                        } else {
+                            scope.launch {
+                                val userExist = userViewModel.userExist(email)
+                                if (userExist) {
+                                    Toast.makeText(context, "pickanother", Toast.LENGTH_LONG)
+                                        .show()
 
-                                    } else {
-                                        Toast.makeText(context, "ol gud", Toast.LENGTH_LONG).show()
-
-                                        userViewModel.insertUser(
-                                            UserEntity(
-                                                userEmail = email,
-                                                userPassword = password
-                                            )
-                                        )
-                                        registerViewModel.onSignUp(
-                                            email,
-                                            password,
-                                            navController,
-                                            key
-                                        )
-
-                                    }
+                                } else {
+                                    Toast.makeText(context, "ol gud", Toast.LENGTH_LONG).show()
+                                    registerViewModel.onSignUp(
+                                        email,
+                                        password,
+                                        navController,
+                                        key
+                                    )
                                 }
                             }
-                        }, modifier = Modifier
-                            .width(180.dp)
-                            .padding(
-                                top = 16.dp,
-                                start = 16.dp,
-                                end = 16.dp
+                        }
+                    }, modifier = Modifier
+                        .width(180.dp)
+                        .padding(
+                            top = 16.dp,
+                            start = 16.dp,
+                            end = 16.dp
+                        )
+                        .height(56.dp)
+                        .align(Alignment.End),
+                    content = {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                "Register",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
                             )
-                            .height(56.dp)
-                            .align(Alignment.End),
-                        content = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Text(
-                                    "Register",
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Icon(
-                                    imageVector = Icons.Default.ArrowForward,
-                                    contentDescription = null,
-                                    tint = Color.White
-                                )
-                            }
-                        })
-                }
+                            Icon(
+                                imageVector = Icons.Default.ArrowForward,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
+                        }
+                    })
             }
         }
     }
+}
+
 

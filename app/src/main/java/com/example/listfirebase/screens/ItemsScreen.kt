@@ -56,7 +56,6 @@ fun ItemsScreen(
     val itemsFlow = itemsViewModel.getAllItems
     val newItems = itemsFlow.collectAsState(initial = emptyList()).value
     val scope = rememberCoroutineScope()
-
     var list: ListEntity = ListEntity()
 
     val parentList = listViewModel.getAllLists.collectAsState(initial = emptyList()).value
@@ -67,6 +66,7 @@ fun ItemsScreen(
             }
         }
     }
+
 
 
     val scaffoldState = rememberScaffoldState()

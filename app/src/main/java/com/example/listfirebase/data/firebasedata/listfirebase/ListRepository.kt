@@ -12,6 +12,7 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.tasks.await
 import kotlin.coroutines.cancellation.CancellationException
 
 class ListRepository() {
@@ -60,13 +61,24 @@ class ListRepository() {
         return _listFlow
     }
 
-    fun saveData(ref: DatabaseReference, list: ListEntity, key: String) {
+    suspend fun uploadData(list: List<ListEntity>) {
+       val reference = FirebaseDatabase.getInstance().getReference(Constants.Lists)
+            .child(FirebaseAuth.getInstance().currentUser?.uid ?: "")
+        for (liste in list) {
+            val childRef = reference.setValue(liste).await()
+        }
+    }
+
+    fun saveData(
+        ref: DatabaseReference,
+        list: ListEntity,
+        key: String,
+        callback: (Boolean) -> Unit
+    ) {
         ref.setValue(list).addOnCompleteListener { task ->
             list.copy(id = key)
-            if (task.isSuccessful) {
-
-            } else {
-            }
+            val success = task.isSuccessful
+            callback(success)
         }
     }
 

@@ -53,10 +53,6 @@ fun AddListFire(
     var listName by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     val db = Firebase.database
-    var firebaseUserId = Firebase.auth.currentUser!!.uid ?: ""
-    if (firebaseUserId == null){
-        firebaseUserId = " "
-    }
 
     val usersRef = db.getReference("users")
     val scope = rememberCoroutineScope()
@@ -88,6 +84,7 @@ fun AddListFire(
                         } else {
                             if (listName.isNotEmpty()) {
                                 if (listViewModel.isNetworkAvailable()) {
+
                                     val reference =
                                         FirebaseDatabase.getInstance().getReference(Constants.Lists)
                                             .child(
@@ -99,28 +96,29 @@ fun AddListFire(
                                         val list = ListEntity(
                                             listName = listName,
                                             id = UUID.randomUUID().toString(),
-                                            listCreatorId = firebaseUserId
+                                            listCreatorId = Firebase.auth.currentUser?.uid!!,
+                                            sync = "1"
                                         )
                                         val newRef = reference.push()
                                             .setValue(list) { error, ref ->
                                                 val key = ref.key
-                                                Toast.makeText(context, "$key", Toast.LENGTH_LONG)
-                                                    .show()
                                                 list.id = key!!
 
-                                                listViewModel.saveData(ref, list, key)
-                                            }
-                                        scope.launch {
-                                            if (listRoomViewModel.insertList(
-                                                    list
-                                                )
-                                            ) {
-                                                navController.navigate(
-                                                    Screens.ListScreenFire.name
-                                                            + "/$id"
-                                                )
-                                            }
-                                        }
+                                                listViewModel.saveData(ref, list, key) { isSucces ->
+
+                                                    }
+                                                }
+                                                scope.launch {
+                                                    if (listRoomViewModel.insertListOnline(list)
+                                                    ) {
+
+                                                        navController.navigate(
+                                                            Screens.ListScreenFire.name
+                                                                    + "/$id"
+                                                        )
+                                                    }
+                                                }
+
                                     } catch (e: Exception) {
 
                                     }
@@ -128,10 +126,11 @@ fun AddListFire(
                                     val list = ListEntity(
                                         listName = listName,
                                         id = UUID.randomUUID().toString(),
+                                        sync = "0"
                                     )
                                     scope.launch {
 
-                                        if (listRoomViewModel.insertList(
+                                        if (listRoomViewModel.insertListOffline(
                                                 list
                                             )
                                         ) {
@@ -143,10 +142,10 @@ fun AddListFire(
                                         }
                                     }
                                 }
-
                             } else {
                                 Toast.makeText(context, "add value", Toast.LENGTH_LONG).show()
                             }
+
                         }
                     }) {
                     Text(text = "Click")

@@ -3,12 +3,19 @@ package com.example.listfirebase.di
 import android.content.Context
 import androidx.room.Room
 import com.example.listfirebase.data.AppDatabase
+import com.example.listfirebase.data.firebasedata.items.ItemsRepository
+import com.example.listfirebase.data.room.additems.ItemsDao
+import com.example.listfirebase.data.room.additems.ItemsRoomRepository
+import com.example.listfirebase.data.room.additems.ItemsRoomViewModel
 import com.example.listfirebase.data.room.addlist.ListDao
 import com.example.listfirebase.data.room.addlist.ListRoomRepository
 import com.example.listfirebase.data.room.loginregister.LoginDao
 import com.example.listfirebase.data.room.loginregister.UserRepository
 import com.example.listfirebase.session.ListSession
 import com.example.listfirebase.session.UserSessionManager
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -36,35 +43,7 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideUserRepository(
-        userDao: LoginDao,
-        userSessionManager: UserSessionManager
-    ): UserRepository {
-        return UserRepository(userDao, userSessionManager)
-    }
+    fun providesFirebaseAuth(): FirebaseAuth = Firebase.auth
 
-    @Provides
-    @Singleton
-    fun providesUserSession(): UserSessionManager {
-        return UserSessionManager()
-    }
-    @Provides
-    @Singleton
-    fun providesListSession(): ListSession {
-        return ListSession()
-    }
-
-
-    @Provides
-    @Singleton
-    fun providesUserDao(database: AppDatabase) = database.loginDao()
-
-    @Provides
-    @Singleton
-    fun providesListDao(database: AppDatabase) = database.listDao()
-
-    @Provides
-    @Singleton
-    fun providesListRepository(dao: ListDao) = ListRoomRepository(dao)
 
 }

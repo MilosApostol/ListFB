@@ -1,5 +1,6 @@
 package com.example.listfirebase.screens
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.listfirebase.R
 import com.example.listfirebase.data.firebasedata.registerlogin.RegisterViewModel
 import com.example.listfirebase.data.room.loginregister.UserViewModel
 import com.example.listfirebase.nav.Screens
@@ -68,17 +71,17 @@ fun LoginFireBase(
     val key = "prboa"
     val scope = rememberCoroutineScope()
     LaunchedEffect(key1 = Unit) {
-        scope.launch {
-            if (registerViewModel.isNetworkAvailable() && registerViewModel.isUserLoggedIn()) {
-                // if you don't sign out user, it will always be something inside of current user, it will always go into listscreen
-            } else if (userViewModel.loggingState()) {
-                navController.navigate(Screens.ListScreenFire.name + "/$key")
-            }
+        if (registerViewModel.isNetworkAvailable() && registerViewModel.isUserLoggedIn()) {
+            // if you don't sign out user, it will always be something inside of current user, it will always go into listscreen
+            navController.navigate(Screens.ListScreenFire.name + "/$key")
+
+        } else if (userViewModel.loggingState()) {
+            navController.navigate(Screens.ListScreenFire.name + "/$key")
         }
     }
-    Firebase.auth.signOut()
-
     val context = LocalContext.current
+    val sharedPreferences =
+    context.getSharedPreferences(stringResource(R.string.app_prefs), Context.MODE_PRIVATE)
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -187,15 +190,25 @@ fun LoginFireBase(
                                         )
                                     userViewModel.updateHolderId(email)
                                     if (user) {
-                                        navController.navigate(Screens.ListScreenFire.name + "/$key")
+                                        navController.navigate(Screens.ListScreenFire.name +
+                                                "/$key")
+                                    } else{
+                                        Toast.makeText(context, "Something is wrong",
+                                            Toast.LENGTH_LONG).show()
                                     }
                                 } else {
                                     //firebase
+
                                     val firebaseLog =
                                         registerViewModel.logIn(email, password)
                                     if (firebaseLog) {
-                                        navController.navigate(Screens.ListScreenFire.name + "/$key")
 
+                                        navController.navigate(Screens.ListScreenFire.name +
+                                                "/$key")
+
+                                    } else{
+                                        Toast.makeText(context, "Something is wrong",
+                                            Toast.LENGTH_LONG).show()
                                     }
                                 }
                             }
@@ -228,14 +241,6 @@ fun LoginFireBase(
                         .fillMaxSize()
                         .padding(16.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.TopStart)
-                    ) {
-                        // Your other content goes here
-                    }
-
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -276,7 +281,6 @@ fun LoginFireBase(
     }
 
 }
-
 
 
 @Preview

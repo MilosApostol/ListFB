@@ -6,7 +6,9 @@ import android.net.NetworkCapabilities
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.listfirebase.Constants
 import com.example.listfirebase.data.firebasedata.items.ItemsEntity
+import com.example.listfirebase.data.room.addlist.ListRoomRepository
 import com.example.listfirebase.data.room.loginregister.UserEntity
 import com.example.listfirebase.data.room.loginregister.UserRepository
 import com.example.listfirebase.session.UserSessionManager
@@ -14,6 +16,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -31,8 +34,16 @@ class ListViewModel @Inject constructor(
     val repository: ListRepository,
     val connectivityManager: ConnectivityManager,
     val userSessionManager: UserSessionManager,
-    val userRepository: UserRepository
+    val userRepository: UserRepository,
+    val repositoryRoom: ListRoomRepository
 ) : ViewModel() {
+
+    val reference =
+        FirebaseDatabase.getInstance().getReference(Constants.Lists)
+            .child(
+                FirebaseAuth.getInstance().currentUser?.uid
+                    ?: ""
+            )
 
     fun isNetworkAvailable(): Boolean {
         val capabilities =
@@ -57,19 +68,23 @@ class ListViewModel @Inject constructor(
         }
     }
 
-    fun changeUserId(context: Context, authUserId: String) {
+    fun uploadData(
+        list: List<ListEntity>
+
+    ) {
         viewModelScope.launch {
-            val currentId = userSessionManager.getUserId()
-            val userId = userSessionManager.setUserId(authUserId!!)
-            Toast.makeText(context, "old $currentId new $userId", Toast.LENGTH_LONG).show()
-        //    userRepository.updateUserId(currentId, authUserId)
+            repository.uploadData(list)
         }
     }
 
-    fun saveData(reference: DatabaseReference, list: ListEntity, key: String) {
-        viewModelScope.launch {
-            repository.saveData(reference, list, key)
-        }
+
+    fun saveData(
+        reference: DatabaseReference,
+        list: ListEntity,
+        key: String,
+        callback: (Boolean) -> Unit
+    ) {
+        repository.saveData(reference, list, key, callback)
     }
 
     fun signOut() {
@@ -78,9 +93,11 @@ class ListViewModel @Inject constructor(
 
     fun deleteAll() {
         viewModelScope.launch {
-            repository.deleteAll()
+            withContext(Dispatchers.IO) {
+                repository.deleteAll()
+                repositoryRoom.deleteAllLists()
+            }
         }
-
     }
 
 

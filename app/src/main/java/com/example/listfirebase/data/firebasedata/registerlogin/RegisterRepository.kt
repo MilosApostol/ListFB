@@ -2,15 +2,19 @@ package com.example.listfirebase.data.firebasedata.registerlogin
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.navigation.NavController
+import com.example.listfirebase.data.room.loginregister.UserRepository
 import com.example.listfirebase.nav.Screens
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CompletableDeferred
 import javax.inject.Inject
 
-class RegisterRepository @Inject constructor(val auth: FirebaseAuth) {
+class RegisterRepository @Inject constructor(
+    val auth: FirebaseAuth,
+    val userRepository: UserRepository
+) {
 
-    private val signedIn = mutableStateOf(false)
-    private val inProgress = mutableStateOf(false)
+     val signedIn = mutableStateOf(false)
+     val inProgress = mutableStateOf(false)
 
     suspend fun signUp(email: String, password: String, navController: NavController, key: String) {
         inProgress.value = true

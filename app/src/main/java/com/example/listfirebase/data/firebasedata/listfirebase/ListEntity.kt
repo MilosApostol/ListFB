@@ -9,5 +9,6 @@ data class ListEntity(
     @PrimaryKey(autoGenerate = false)
     var id: String = "tururur",
     val listName: String = "",
-    val listCreatorId: String = ""
+    val listCreatorId: String = "",
+    val sync: String = "0"
 )

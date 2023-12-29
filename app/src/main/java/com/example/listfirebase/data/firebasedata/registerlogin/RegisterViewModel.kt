@@ -5,6 +5,7 @@ import android.net.NetworkCapabilities
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
+import androidx.room.util.copy
 import com.example.listfirebase.data.room.loginregister.UserEntity
 import com.example.listfirebase.data.room.loginregister.UserRepository
 import com.example.listfirebase.nav.Screens
@@ -48,38 +49,69 @@ class RegisterViewModel @Inject constructor(
             false
         }
     }
-    suspend fun onSignUp(email: String, password: String, navController: NavController, key: String) {
-        if (!isNetworkAvailable()) {
 
-        } else
-            repository.signUp(email, password, navController, key)
+    suspend fun onSignUp(
+        email: String,
+        password: String,
+        navController: NavController,
+        key: String
+    ) {
+        repository.signUp(email, password, navController, key)
+        val user = UserEntity(
+            userEmail = email,
+            userPassword = password,
+            userHolderId = key,
+            isLoggedIn = true
+        )
+        userRepository.insertUser(
+            user
+        )
+        userSessionManager.apply {
+            setUserLoggedIn(true)
+            userSessionManager.currentUser = user
+        }
+    }
+
+    suspend fun logInAfterOffline(email: String, password: String) {
+        repository.logIn(email, password)
     }
 
     fun getUserId(): String {
         return userSessionManager.getUserId()
     }
 
-
     suspend fun logIn(email: String, password: String): Boolean {
         return withContext(Dispatchers.IO) {
             if (isNetworkAvailable()) {
-                return@withContext repository.logIn(email, password)
-            }
-            return@withContext false
-
-            /*else {
                 val user = userRepository.getUserByName(email)
-
-                if (user != null && user.userPassword == password) {
-                    userSessionManager.setUser(user)
-                    return@withContext true
+                if (user != null) {
+                    if (user.userPassword == password) {
+                        userSessionManager.currentUser = user
+                        userSessionManager.isUserLoggedIn.value = true
+                        userRepository.updateUser(user.copy(isLoggedIn = true))
+                        return@withContext repository.logIn(email, password)
+                    } else {
+                        return@withContext false
+                    }
+                } else {
+                    return@withContext false
                 }
             }
             return@withContext false
-
-             */
         }
     }
+
+    /*else {
+        val user = userRepository.getUserByName(email)
+
+        if (user != null && user.userPassword == password) {
+            userSessionManager.setUser(user)
+            return@withContext true
+        }
+    }
+    return@withContext false
+
+     */
 
     fun signOut() {
         auth.signOut()

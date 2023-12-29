@@ -35,19 +35,11 @@ class ListRoomViewModel @Inject constructor(
         }
     }
 
-    /*
-fun fetchUserLists(userId: String): Flow<List<ListEntity>> {
-    viewModelScope.launch {
-        repository.getListsByUserId(userId)
-    }
-}
-
-*/
     fun getListById(listId: String): Flow<List<ListEntity>> {
         return repository.getListsByUserId(listId)
     }
 
-    suspend fun insertList(list: ListEntity): Boolean {
+    suspend fun insertListOffline(list: ListEntity): Boolean {
         return withContext(Dispatchers.IO) {
             val userId = userSessionManager.getUserId()
             if (userId != null) {
@@ -58,6 +50,14 @@ fun fetchUserLists(userId: String): Flow<List<ListEntity>> {
             } else {
                 false
             }
+        }
+    }
+
+    //returns True as long as getUserId is not null
+    suspend fun insertListOnline(list: ListEntity): Boolean {
+        return withContext(Dispatchers.IO) {
+            repository.insertList(list)
+            true
         }
     }
 

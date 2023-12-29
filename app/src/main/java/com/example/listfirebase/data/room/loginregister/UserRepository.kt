@@ -33,6 +33,7 @@ class UserRepository
         }
     }
 
+
     suspend fun updateUser(user: UserEntity) {
         withContext(Dispatchers.IO) {
             userDao.updateUser(user)

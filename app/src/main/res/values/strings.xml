@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">ListFirebase</string>
     <string name="app_prefs" />
+    <string name="state">\n</string>
+    <string name="logged">\n</string>
 </resources>

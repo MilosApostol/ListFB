@@ -59,6 +59,8 @@ kapt {
 }
 
 dependencies {
+    implementation ("androidx.compose.material:material-icons-extended:1.5.4")
+
     implementation ("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
     implementation ("androidx.core:core-ktx:1.12.0")
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
@@ -97,7 +99,7 @@ dependencies {
     // Material Design 3
     implementation("androidx.compose.material3:material3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation("androidx.activity:activity-compose:1.8.1")
+    implementation("androidx.activity:activity-compose:1.8.2")
     implementation("androidx.compose.runtime:runtime-livedata")
 
     implementation("androidx.navigation:navigation-compose:2.7.5")

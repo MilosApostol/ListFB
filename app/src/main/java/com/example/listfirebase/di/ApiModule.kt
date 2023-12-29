@@ -37,30 +37,9 @@ object ApiModule {
         return AddItemsRepository(apiService)
     }
 
-    @Provides
-    @Singleton
-    fun providesItemsRepository(): ItemsRepository = ItemsRepository()
-
-
-    @Provides
-    @Singleton
-    fun providesListViewModel(
-        repository: ListRepository,
-        connectivityManager: ConnectivityManager,
-        userSessionManager: UserSessionManager,
-        userRepository: UserRepository
-    ) = ListViewModel(repository, connectivityManager, userSessionManager, userRepository)
 
     @Provides
     fun provideConnectivityManager(application: Application): ConnectivityManager {
         return application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     }
-
-    @Provides
-    @Singleton
-    fun providesListRoomViewModel(
-        repository: ListRoomRepository,
-        userSessionManager: UserSessionManager,
-        listSession: ListSession
-    ) = ListRoomViewModel(repository, userSessionManager, listSession)
 }
