@@ -65,11 +65,13 @@ fun ItemsScreen(
     val newItems = itemsFlow.collectAsState(initial = emptyList()).value
     val scope = rememberCoroutineScope()
     var list = ListEntity()
+    var offList = ListEntity()
     val parentList = listViewModel.getAllLists.collectAsState(initial = emptyList()).value
-    val parentRoomList = listRoomViewModel.getAllLists.collectAsState(emptyList()).value
 
-    val roomFlow = itemsRoomViewModel.getAllItems
-    val roomList = roomFlow.collectAsState(emptyList()).value
+    val items = itemsFlow.collectAsState(initial = emptyList()).value
+    val roomListFlow = listRoomViewModel.getAllLists
+    val roomList = roomListFlow.collectAsState(initial = emptyList()).value
+
 
     if (listViewModel.isNetworkAvailable()) {
         for (item in parentList) {
@@ -81,10 +83,10 @@ fun ItemsScreen(
             }
         }
     } else {
-        for (item in parentRoomList) {
-            when (item.id) {
+        for (item in roomList) {
+            when (item.listCreatorId) {
                 id -> {
-                    list = item
+                    offList = item
                 }
             }
         }
@@ -106,7 +108,7 @@ fun ItemsScreen(
                     if (listViewModel.isNetworkAvailable()) {
                         Text(text = list.listName)
                     } else {
-                        Text(text = list.listName)
+                        Text(text = offList.listName)
                     }
                 },
                 navigationIcon = {
@@ -177,7 +179,7 @@ fun ItemsScreen(
                         })
                 }
             } else {
-                items(roomList.filter { it.itemCreatorId == list.id },
+                items(items.filter { it.itemCreatorId == list.id },
                     key = { item -> item.itemId } // it has to have a key, swipe wouldn't work without it
 
                 ) { item ->
