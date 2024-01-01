@@ -94,7 +94,6 @@ fun ListScreenFire(
     val currentRoute = navController.currentDestination?.route
     var userId: String? = ""
     val itemsToUpload = getItemsToUpload(roomList)
-    /*
     LaunchedEffect(Unit) {
         if (itemsToUpload.isNotEmpty()) {
             listViewModel.uploadData(itemsToUpload) {
@@ -104,9 +103,6 @@ fun ListScreenFire(
             }
         }
     }
-
-     */
-
     if (registerViewModel.isNetworkAvailable()) {
         //changing ID of the room databaseID
         LaunchedEffect(key1 = Unit, key2 = FirebaseAuth.getInstance().currentUser) {
@@ -115,8 +111,6 @@ fun ListScreenFire(
             val user = userViewModel.getUserDetails()
             if (user != null) {
                 registerViewModel.logInAfterOffline(user.userEmail, user.userPassword)
-                scope.launch {
-                }
             } else {
                 // no offline user?? crash program xd
             }
@@ -131,7 +125,6 @@ fun ListScreenFire(
             userViewModel.getUserId()
         }
     }
-
     userId = userViewModel.userIdState
 
     Scaffold(scaffoldState = drawerScaffoldState, topBar = {

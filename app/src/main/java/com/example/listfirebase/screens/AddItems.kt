@@ -35,11 +35,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.listfirebase.Constants
+import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsData
 import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsViewModel
 import com.example.listfirebase.data.firebasedata.items.ItemsEntity
 import com.example.listfirebase.data.firebasedata.items.ItemsViewModel
 import com.example.listfirebase.data.firebasedata.listfirebase.ListViewModel
 import com.example.listfirebase.data.room.additems.ItemsRoomViewModel
+import com.example.listfirebase.data.room.additems.ListItemsViewModel
+import com.example.listfirebase.data.room.additemscustom.AddItemsCustomViewM
+import com.example.listfirebase.di.CustomAdd
 import com.example.listfirebase.nav.Screens
 import com.example.listfirebase.predefinedlook.SearchItems
 import com.google.firebase.Firebase
@@ -60,29 +64,28 @@ fun AddItems(
     addItemsViewModel: AddItemsViewModel = hiltViewModel(),
     itemsViewModel: ItemsViewModel = hiltViewModel(),
     itemsRoomViewModel: ItemsRoomViewModel = hiltViewModel(),
-    listViewModel: ListViewModel = hiltViewModel()
+    listViewModel: ListViewModel = hiltViewModel(),
+    addItemsCustomViewM: AddItemsCustomViewM = hiltViewModel(),
+    listItemsViewModel: ListItemsViewModel = hiltViewModel()
 ) {
-    val databaseReference: DatabaseReference =
-        FirebaseDatabase.getInstance().getReference(Constants.Items)
-            .child(Firebase.auth.currentUser?.uid!!)
-
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
-    var items = addItemsViewModel.addItem.collectAsState().value
+    var items = addItemsViewModel.addItem.collectAsState()
     val scope = rememberCoroutineScope()
     val key = ""
-    //  val allItems by addCustomViewModel.getAllItems.collectAsState(initial = listOf()) for room
-    //  val filteredItems = allItems.filter { it.title.contains(text, ignoreCase = true) }
 
-    val context = LocalContext.current
-    Toast.makeText(context, "$id", Toast.LENGTH_LONG).show()
+    //get all custom items from before
+    val allItems by addItemsCustomViewM.gettCustomItems.collectAsState(initial = listOf())
+    // have no idea what this does
+    val filteredItems = allItems.filter { it.title.contains(text, ignoreCase = true) }
+    // val list = listItemsViewModel.getList()
+
+
     LaunchedEffect(Unit) {
         scope.launch {
             addItemsViewModel.getItems()
         }
     }
-
-
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
@@ -92,131 +95,116 @@ fun AddItems(
                     Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Menu")
                 }
             })
-        DockedSearchBar(
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .semantics { traversalIndex = -1f }
-                .fillMaxWidth(),
-            query = text,
-            onQueryChange = {
-                text = it
-                addItemsViewModel.onSearchChange(text)
-            },
-            onSearch = {
-                if (listViewModel.isNetworkAvailable()) {
-                    for (item in items) {
-                        val key = databaseReference.key!!
-                        val item =
-                            ItemsEntity(
-                                itemId = UUID.randomUUID().toString(), //temporary ID
-                                itemName = item.title,
-                                description = item.description,
-                                itemCreatorId = id //parent ID
-                            )
-                        val newRef = databaseReference.push()
-                            .setValue(item) { _, ref ->
-                                val key = ref.key
-                                item.itemId = key!!
-                            }
-                        addItemsViewModel.saveItems(databaseReference, item, key)
-                        scope.launch {
-                            if (itemsRoomViewModel.insertItemsOnline(item)) {
-                                active = false
-                                navController.navigate(Screens.ItemsScreenFire.name + "/$key")
-                            }
-                        }
-
-                    }
-                } else {
-                    for (item in items) {
-                        val item =
-                            ItemsEntity(
-                                itemId = UUID.randomUUID().toString(), //temporary ID
-                                itemName = item.title,
-                                description = item.description,
-                                itemCreatorId = id //parent ID
-                            )
-                        scope.launch {
-                            if (itemsRoomViewModel.insertItemsOnline(item)) {
-                                active = false
-                                navController.navigate(Screens.ItemsScreenFire.name + "/$key")
-                            }
-                        }
-
-                    }
-                }
-            },
-            active = active,
-            onActiveChange = { active = it },
-            placeholder = { Text("Hinted search text") },
-            leadingIcon = {
-                if (!active) {
-                    Icon(Icons.Default.Search, contentDescription = null)
-                } else {
-                    Icon(
-                        Icons.Default.ArrowBack,
-                        contentDescription = null,
-                        modifier = Modifier.clickable { active = false })
-                }
-            },
-            trailingIcon = {
-                if (active) {
-                    Icon(Icons.Default.Close,
-                        contentDescription = null,
-                        modifier = Modifier.clickable {
-                        }
-                    )
-                }
+    }
+    DockedSearchBar(
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .semantics { traversalIndex = -1f }
+            .fillMaxWidth(),
+        query = text,
+        onQueryChange = {
+            text = it
+            addItemsViewModel.onSearchChange(text)
+        },
+        onSearch = {
+            if (listViewModel.isNetworkAvailable()) {
+                val item = AddItemsData(
+                    title = text,
+                    id = UUID.randomUUID().toString(),
+                    listCreatorId = id
+                )
+                addItemsCustomViewM.addItem(item)
+                saveData(
+                    itemName = text,
+                    id,
+                    navController,
+                    itemsViewModel,
+                    itemsRoomViewModel,
+                    scope
+                )
+                active = false
+            } else {
+                addItemsCustomViewM.addItem(AddItemsData(title = text))
             }
-        ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp)
-            )
-            {
-                items(
-                    items
-                ) { item ->
-                    if (listViewModel.isNetworkAvailable()) {
-                        SearchItems(itemsData = item, onClick = {
-                            saveData(
-                                item.title,
-                                id,
-                                item.description,
-                                navController,
-                                itemsViewModel = itemsViewModel,
-                                itemsRoomViewModel,
-                                scope
-                            )
-                        })
+        },
+        active = active,
+        onActiveChange = { active = it },
+        placeholder = { Text("Hinted search text") },
+        leadingIcon = {
+            if (!active) {
+                Icon(Icons.Default.Search, contentDescription = null)
+            } else {
+                Icon(
+                    Icons.Default.ArrowBack,
+                    contentDescription = null,
+                    modifier = Modifier.clickable { active = false })
+            }
+        },
+        trailingIcon = {
+            if (active) {
+                Icon(Icons.Default.Close,
+                    contentDescription = null,
+                    modifier = Modifier.clickable {
                     }
-
-                }
+                )
             }
         }
+    ) {
+        LazyColumn() {
 
+            items(filteredItems) { items ->
+                CustomAdd(customItem = items, onClick = {
+                    addItemsCustomViewM.removeItem(items)
+                }, onRowClick = {
+                    addItemsCustomViewM.addToSelectedItems(items)
+                    saveData(
+                        itemName = items.title,
+                        id,
+                        navController,
+                        itemsViewModel,
+                        itemsRoomViewModel,
+                        scope
+                    )
+                    active = false
+                })
+            }
+        }
+        LazyColumn() {
+            items(items.value) { item ->
+                SearchItems(itemsData = item, onClick = {
+                    addItemsViewModel.addToSelectedItems(item)
+                    active = false
+                    saveData(
+                        itemName = item.title,
+                        id,
+                        navController,
+                        itemsViewModel,
+                        itemsRoomViewModel,
+                        scope
+                    )
+
+                })
+            }
+        }
     }
 }
+
 
 fun saveData(
     itemName: String,
     id: String,
-    description: String,
     navController: NavController,
     itemsViewModel: ItemsViewModel,
     itemsRoomViewModel: ItemsRoomViewModel,
-    scope: CoroutineScope
+    scope: CoroutineScope,
 ) {
-
     val db = Firebase.database
     val ref = db.getReference(Constants.Items)
         .child(Firebase.auth.currentUser?.uid!!)
     val newItem = ItemsEntity(
         itemName = itemName,
         itemId = UUID.randomUUID().toString(),
-        itemCreatorId = id.toString(),
-        description = description
+        itemCreatorId = id,
     )
     val key = ref.key!!
     val newValue = ref.push()
@@ -229,7 +217,7 @@ fun saveData(
         }
     }
     navController.navigate(Screens.ItemsScreenFire.name + "/$id") {
-        popUpTo(Screens.AddItemsFire.name + "$id") {
+        popUpTo(Screens.AddItems.name + "$id") {
             inclusive = true
         }
     }

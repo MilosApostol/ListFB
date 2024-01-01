@@ -63,11 +63,7 @@ fun RegisterScreenFire(
     var passwordVisible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val key = ""
-    if (password.length < 6){
-        Text(text = "At least 6 caracters long",
-            color = Color.Red)
-    }
+    val key = "pappa"
 
     Column(modifier = Modifier.fillMaxWidth()) {
         TopAppBar(title = { Text("RegisterScreen") }, navigationIcon = {
@@ -124,13 +120,12 @@ fun RegisterScreenFire(
                                         .show()
 
                                 } else {
-                                    Toast.makeText(context, "ol gud", Toast.LENGTH_LONG).show()
-                                    val reg = registerViewModel.onSignUp(
+                                    registerViewModel.onSignUp(
                                         email,
                                         password,
-                                        key
+                                        key, navController
+
                                     )
-                                    navController.navigate(Screens.ListScreenFire.name + "/$key")
 
                                 }
                             }

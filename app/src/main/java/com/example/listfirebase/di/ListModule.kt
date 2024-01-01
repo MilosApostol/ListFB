@@ -4,6 +4,7 @@ import android.net.ConnectivityManager
 import com.example.listfirebase.data.AppDatabase
 import com.example.listfirebase.data.firebasedata.listfirebase.ListRepository
 import com.example.listfirebase.data.firebasedata.listfirebase.ListViewModel
+import com.example.listfirebase.data.room.additems.ListItemsViewModel
 import com.example.listfirebase.data.room.addlist.ListDao
 import com.example.listfirebase.data.room.addlist.ListRoomRepository
 import com.example.listfirebase.data.room.addlist.ListRoomViewModel
@@ -65,4 +66,8 @@ class ListModule {
         userRepository,
         listRoomRepository
     )
+
+    @Provides
+    @Singleton
+    fun providesListItemsViewModel(listSession: ListSession) = ListItemsViewModel(listSession)
 }

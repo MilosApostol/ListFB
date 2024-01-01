@@ -16,9 +16,9 @@ class RegisterRepository @Inject constructor(
 ) {
     private val _isUserLoggedInState = MutableStateFlow(false)
     val isUserLoggedInState = _isUserLoggedInState.asStateFlow()
-     val inProgress = mutableStateOf(false)
+    val inProgress = mutableStateOf(false)
     private val signedIn = mutableStateOf(false)
-    suspend fun signUp(email: String, password: String, key: String) {
+    suspend fun signUp(email: String, password: String, key: String, navController: NavController) {
         inProgress.value = true
 
         auth.createUserWithEmailAndPassword(
@@ -29,6 +29,7 @@ class RegisterRepository @Inject constructor(
                 if (task.isSuccessful) {
                     _isUserLoggedInState.value = true
                     signedIn.value = true
+                    navController.navigate(Screens.ListScreenFire.name + "/$key")
                 } else {
                     signedIn.value = false
                 }

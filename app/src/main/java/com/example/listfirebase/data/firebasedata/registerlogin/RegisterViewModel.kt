@@ -59,26 +59,27 @@ class RegisterViewModel @Inject constructor(
     suspend fun onSignUp(
         email: String,
         password: String,
-        key: String
-    ) {
-        repository.signUp(email, password, key)
-        val user = UserEntity(
-            userEmail = email,
-            userPassword = password,
-            userHolderId = key,
-            isLoggedIn = true
-        )
-        userRepository.insertUser(
-            user
-        )
-        Firebase.auth.currentUser?.uid?.let { userSessionManager.setUserId(it) }
-        userSessionManager.apply {
-            setUserLoggedIn(true)
+        key: String,
+        navController: NavController
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+        repository.signUp(email, password, key, navController)
+            val user = UserEntity(
+                userEmail = email,
+                userPassword = password,
+                userHolderId = key,
+                isLoggedIn = true
+            )
             _isUserLoggedInState.value = true
-            userSessionManager.currentUser = user
+            userRepository.insertUser(user)
+            Firebase.auth.currentUser?.uid?.let { userSessionManager.setUserId(it) }
+            userSessionManager.apply {
+                setUserLoggedIn(true)
+                currentUser = user
+            }
+            return@withContext false
         }
     }
-
     suspend fun logInAfterOffline(email: String, password: String) {
         _isUserLoggedInState.value = true
         repository.logIn(email, password)

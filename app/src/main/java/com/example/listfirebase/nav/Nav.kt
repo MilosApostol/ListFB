@@ -71,7 +71,7 @@ fun NavGraph(
             }
 
             composable(
-                Screens.AddItemsFire.name + "/{id}",
+                Screens.AddItems.name + "/{id}",
                 arguments = listOf(
                     navArgument("id") {
                         type = NavType.StringType

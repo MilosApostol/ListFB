@@ -10,7 +10,7 @@ import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsData
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-abstract class AddItemsCustomDao(database: AppDatabase) {
+abstract class AddItemsCustomDao() {
 
     @Query("SELECT * FROM `add_items_table`")
     abstract fun getAll(): Flow<List<AddItemsData>>

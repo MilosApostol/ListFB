@@ -7,7 +7,7 @@ enum class Screens{
     LoginFireBase,
     RegisterScreenFire,
     ItemsScreenFire,
-    AddItemsFire
+    AddItems
 }
 sealed class Screen(
     val title: String,
