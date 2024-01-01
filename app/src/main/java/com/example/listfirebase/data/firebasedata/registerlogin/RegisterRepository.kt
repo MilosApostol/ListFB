@@ -29,7 +29,14 @@ class RegisterRepository @Inject constructor(
                 if (task.isSuccessful) {
                     _isUserLoggedInState.value = true
                     signedIn.value = true
-                    navController.navigate(Screens.ListScreenFire.name + "/$key")
+                    navController.navigate(
+                        Screens.ListScreenFire.name +
+                                "/$key"
+                    ) {
+                        popUpTo(Screens.ListScreenFire.name) {
+                            inclusive = true
+                        }
+                    }
                 } else {
                     signedIn.value = false
                 }

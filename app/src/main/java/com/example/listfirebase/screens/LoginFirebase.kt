@@ -77,12 +77,12 @@ fun LoginFireBase(
         if (isLoggedInState.value && registerViewModel.isNetworkAvailable()) {
             navController.navigate(Screens.ListScreenFire.name + "/$key")
         } else if (userViewModel.loggingState()) {
-          navController.navigate(Screens.ListScreenFire.name + "/$key")
+            navController.navigate(Screens.ListScreenFire.name + "/$key")
         }
     }
     val context = LocalContext.current
     val sharedPreferences =
-    context.getSharedPreferences(stringResource(R.string.app_prefs), Context.MODE_PRIVATE)
+        context.getSharedPreferences(stringResource(R.string.app_prefs), Context.MODE_PRIVATE)
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -191,11 +191,19 @@ fun LoginFireBase(
                                         )
                                     userViewModel.updateHolderId(email)
                                     if (user) {
-                                        navController.navigate(Screens.ListScreenFire.name +
-                                                "/$key")
-                                    } else{
-                                        Toast.makeText(context, "Something is wrong",
-                                            Toast.LENGTH_LONG).show()
+                                        navController.navigate(
+                                            Screens.ListScreenFire.name +
+                                                    "/$key"
+                                        ) {
+                                            popUpTo(Screens.ListScreenFire.name) {
+                                                inclusive = true
+                                            }
+                                        }
+                                    } else {
+                                        Toast.makeText(
+                                            context, "Something is wrong",
+                                            Toast.LENGTH_LONG
+                                        ).show()
                                     }
                                 } else {
                                     //firebase
@@ -204,12 +212,20 @@ fun LoginFireBase(
                                         registerViewModel.logIn(email, password)
                                     if (firebaseLog) {
 
-                                        navController.navigate(Screens.ListScreenFire.name +
-                                                "/$key")
+                                        navController.navigate(
+                                            Screens.ListScreenFire.name +
+                                                    "/$key"
+                                        ) {
+                                            popUpTo(Screens.ListScreenFire.name) {
+                                                inclusive = true
+                                            }
+                                        }
 
-                                    } else{
-                                        Toast.makeText(context, "Something is wrong",
-                                            Toast.LENGTH_LONG).show()
+                                    } else {
+                                        Toast.makeText(
+                                            context, "Something is wrong",
+                                            Toast.LENGTH_LONG
+                                        ).show()
                                     }
                                 }
                             }

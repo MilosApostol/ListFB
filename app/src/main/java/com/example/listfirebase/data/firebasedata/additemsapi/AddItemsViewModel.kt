@@ -64,6 +64,7 @@ class AddItemsViewModel @Inject constructor(
                 it.title = items.title
                 it.description = items.description
                 it.price = items.price
+                it.listCreatorId = items.listCreatorId
             } ?: run {
                 _selectedItem.addAll(listOf(items))
             }

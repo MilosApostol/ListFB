@@ -58,8 +58,6 @@ fun ItemsScreen(
     listRoomViewModel: ListRoomViewModel = hiltViewModel()
 ) {
 
-    Toast.makeText(LocalContext.current, "$id", Toast.LENGTH_LONG).show()
-
     //firebase
     val itemsFlow = itemsViewModel.getAllItems
     val newItems = itemsFlow.collectAsState(initial = emptyList()).value
@@ -94,9 +92,6 @@ fun ItemsScreen(
     LaunchedEffect(Unit){
 
     }
-
-    Toast.makeText(LocalContext.current, list.listName, Toast.LENGTH_LONG).show()
-
     val scaffoldState = rememberScaffoldState()
 
     Scaffold(
@@ -120,7 +115,11 @@ fun ItemsScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    navController.navigate(Screens.AddItems.name + "/${list.id}")
+                    if (listViewModel.isNetworkAvailable()) {
+                        navController.navigate(Screens.AddItems.name + "/${list.id}")
+                    }else{
+                        navController.navigate(Screens.AddItems.name + "/${offList.id}")
+                    }
                 },
             ) {
                 Icon(Icons.Filled.Add, "Add List")
@@ -143,6 +142,7 @@ fun ItemsScreen(
                     if (dismissState.isDismissed(direction = DismissDirection.EndToStart)) {
                         Toast.makeText(LocalContext.current, "Delete", Toast.LENGTH_SHORT).show()
                         itemsViewModel.removeItem(itemId = item.itemId)
+                        itemsRoomViewModel.removeItem(item)
                     }
 
                     SwipeToDismiss(
