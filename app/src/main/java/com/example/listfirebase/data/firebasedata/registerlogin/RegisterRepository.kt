@@ -6,17 +6,19 @@ import com.example.listfirebase.data.room.loginregister.UserRepository
 import com.example.listfirebase.nav.Screens
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 class RegisterRepository @Inject constructor(
     val auth: FirebaseAuth,
     val userRepository: UserRepository
 ) {
-
-     val signedIn = mutableStateOf(false)
+    private val _isUserLoggedInState = MutableStateFlow(false)
+    val isUserLoggedInState = _isUserLoggedInState.asStateFlow()
      val inProgress = mutableStateOf(false)
-
-    suspend fun signUp(email: String, password: String, navController: NavController, key: String) {
+    private val signedIn = mutableStateOf(false)
+    suspend fun signUp(email: String, password: String, key: String) {
         inProgress.value = true
 
         auth.createUserWithEmailAndPassword(
@@ -25,11 +27,10 @@ class RegisterRepository @Inject constructor(
         )
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    _isUserLoggedInState.value = true
                     signedIn.value = true
-                    navController.navigate(Screens.ListScreenFire.name + "/$key")
                 } else {
                     signedIn.value = false
-
                 }
                 inProgress.value = false
 
@@ -44,10 +45,9 @@ class RegisterRepository @Inject constructor(
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // Login successful
+                    _isUserLoggedInState.value = true
                     resultDeferred.complete(true)
                 } else {
-                    // Login failed
                     resultDeferred.complete(false)
                 }
 

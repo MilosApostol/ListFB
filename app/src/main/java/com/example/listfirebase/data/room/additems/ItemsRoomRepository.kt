@@ -34,4 +34,8 @@ class ItemsRoomRepository @Inject constructor(val dao: ItemsDao) {
         return dao.getItemsByListId(listId)
     }
 
+    fun getItems(): Flow<List<ItemsEntity>>{
+        return dao.getAll()
+    }
+
 }

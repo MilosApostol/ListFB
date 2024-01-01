@@ -4,9 +4,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
+@Entity(tableName = "add_items_table")
 data class AddItemsData(
-    @PrimaryKey(autoGenerate = true)
-    val id: String,
+    @PrimaryKey(autoGenerate = false)
+    var id: String,
     @SerializedName("title")
     var title: String = "",
     @SerializedName("description")

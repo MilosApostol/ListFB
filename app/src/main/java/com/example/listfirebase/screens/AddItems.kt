@@ -38,6 +38,8 @@ import com.example.listfirebase.Constants
 import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsViewModel
 import com.example.listfirebase.data.firebasedata.items.ItemsEntity
 import com.example.listfirebase.data.firebasedata.items.ItemsViewModel
+import com.example.listfirebase.data.firebasedata.listfirebase.ListViewModel
+import com.example.listfirebase.data.room.additems.ItemsRoomViewModel
 import com.example.listfirebase.nav.Screens
 import com.example.listfirebase.predefinedlook.SearchItems
 import com.google.firebase.Firebase
@@ -45,6 +47,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.database
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -55,17 +58,22 @@ fun AddItems(
     id: String,
     navController: NavController = rememberNavController(),
     addItemsViewModel: AddItemsViewModel = hiltViewModel(),
-    itemsViewModel: ItemsViewModel = hiltViewModel()
+    itemsViewModel: ItemsViewModel = hiltViewModel(),
+    itemsRoomViewModel: ItemsRoomViewModel = hiltViewModel(),
+    listViewModel: ListViewModel = hiltViewModel()
 ) {
     val databaseReference: DatabaseReference =
         FirebaseDatabase.getInstance().getReference(Constants.Items)
             .child(Firebase.auth.currentUser?.uid!!)
+
     var text by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     var items = addItemsViewModel.addItem.collectAsState().value
     val scope = rememberCoroutineScope()
+    val key = ""
     //  val allItems by addCustomViewModel.getAllItems.collectAsState(initial = listOf()) for room
     //  val filteredItems = allItems.filter { it.title.contains(text, ignoreCase = true) }
+
     val context = LocalContext.current
     Toast.makeText(context, "$id", Toast.LENGTH_LONG).show()
     LaunchedEffect(Unit) {
@@ -95,24 +103,47 @@ fun AddItems(
                 addItemsViewModel.onSearchChange(text)
             },
             onSearch = {
-                for (item in items) {
-                    val key = databaseReference.key!!
-                    val item =
-                        ItemsEntity(
-                            itemId = UUID.randomUUID().toString(), //temporary ID
-                            itemName = item.title,
-                            description = item.description,
-                            itemCreatorId = id //parent ID
-                        )
-                    val newRef = databaseReference.push()
-                        .setValue(item) { _, ref ->
-                            val key = ref.key
-                            item.itemId = key!!
+                if (listViewModel.isNetworkAvailable()) {
+                    for (item in items) {
+                        val key = databaseReference.key!!
+                        val item =
+                            ItemsEntity(
+                                itemId = UUID.randomUUID().toString(), //temporary ID
+                                itemName = item.title,
+                                description = item.description,
+                                itemCreatorId = id //parent ID
+                            )
+                        val newRef = databaseReference.push()
+                            .setValue(item) { _, ref ->
+                                val key = ref.key
+                                item.itemId = key!!
+                            }
+                        addItemsViewModel.saveItems(databaseReference, item, key)
+                        scope.launch {
+                            if (itemsRoomViewModel.insertItemsOnline(item)) {
+                                active = false
+                                navController.navigate(Screens.ItemsScreenFire.name + "/$key")
+                            }
                         }
-                    addItemsViewModel.saveItems(databaseReference, item, key)
 
-                    active = false
-                    navController.navigate(Screens.ItemsScreenFire.name + "/$key")
+                    }
+                } else {
+                    for (item in items) {
+                        val item =
+                            ItemsEntity(
+                                itemId = UUID.randomUUID().toString(), //temporary ID
+                                itemName = item.title,
+                                description = item.description,
+                                itemCreatorId = id //parent ID
+                            )
+                        scope.launch {
+                            if (itemsRoomViewModel.insertItemsOnline(item)) {
+                                active = false
+                                navController.navigate(Screens.ItemsScreenFire.name + "/$key")
+                            }
+                        }
+
+                    }
                 }
             },
             active = active,
@@ -147,21 +178,35 @@ fun AddItems(
                 items(
                     items
                 ) { item ->
-                    SearchItems(itemsData = item, onClick = {
-                        saveData(item.title, id, item.description, navController, itemsViewModel = itemsViewModel)
-                    })
+                    if (listViewModel.isNetworkAvailable()) {
+                        SearchItems(itemsData = item, onClick = {
+                            saveData(
+                                item.title,
+                                id,
+                                item.description,
+                                navController,
+                                itemsViewModel = itemsViewModel,
+                                itemsRoomViewModel,
+                                scope
+                            )
+                        })
+                    }
+
                 }
             }
         }
 
     }
 }
+
 fun saveData(
     itemName: String,
     id: String,
     description: String,
     navController: NavController,
-    itemsViewModel: ItemsViewModel
+    itemsViewModel: ItemsViewModel,
+    itemsRoomViewModel: ItemsRoomViewModel,
+    scope: CoroutineScope
 ) {
 
     val db = Firebase.database
@@ -175,16 +220,19 @@ fun saveData(
     )
     val key = ref.key!!
     val newValue = ref.push()
-    newValue.setValue(newItem){error, ref ->
+    newValue.setValue(newItem) { error, ref ->
         val key = ref.key
         newItem.itemId = key!!
         itemsViewModel.updateData(ref, newItem, key)
-    }
-        navController.navigate(Screens.ItemsScreenFire.name + "/$id") {
-            popUpTo(Screens.AddItemsFire.name + "$id") {
-                inclusive = true
-            }
+        scope.launch {
+            itemsRoomViewModel.insertItemsOnline(newItem)
         }
+    }
+    navController.navigate(Screens.ItemsScreenFire.name + "/$id") {
+        popUpTo(Screens.AddItemsFire.name + "$id") {
+            inclusive = true
+        }
+    }
 }
 
 

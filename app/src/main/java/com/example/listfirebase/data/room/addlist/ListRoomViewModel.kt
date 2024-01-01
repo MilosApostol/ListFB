@@ -1,8 +1,12 @@
 package com.example.listfirebase.data.room.addlist
 
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.listfirebase.data.firebasedata.listfirebase.ListEntity
+import com.example.listfirebase.data.room.loginregister.UserRepository
+import com.example.listfirebase.data.room.loginregister.UserViewModel
 import com.example.listfirebase.session.ListSession
 import com.example.listfirebase.session.UserSessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,9 +24,14 @@ import javax.inject.Inject
 class ListRoomViewModel @Inject constructor(
     val repository: ListRoomRepository,
     val userSessionManager: UserSessionManager,
-    val listSession: ListSession
+    val listSession: ListSession,
+    val userRepository: UserRepository
 ) : ViewModel() {
 
+    val expandedStates = mutableStateMapOf<String, Boolean>()
+
+     val _activeState = MutableStateFlow(false)
+    val activeState = _activeState.asStateFlow()
 
     private val _getAllLists = MutableStateFlow<List<ListEntity>>(emptyList())
     val getAllLists: StateFlow<List<ListEntity>> get() = _getAllLists.asStateFlow()
@@ -41,11 +50,10 @@ class ListRoomViewModel @Inject constructor(
 
     suspend fun insertListOffline(list: ListEntity): Boolean {
         return withContext(Dispatchers.IO) {
-            val userId = userSessionManager.getUserId()
-            if (userId != null) {
+            val user = userRepository.getUserByLoggedInStatus()
+            if (user != null) {
                 repository.insertList(list)
-                val userId = userSessionManager.getUserId()
-                repository.updateList(list.copy(listCreatorId = userId))
+                repository.updateList(list.copy(listCreatorId = user.userId))
                 true
             } else {
                 false

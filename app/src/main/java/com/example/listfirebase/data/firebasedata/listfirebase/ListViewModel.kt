@@ -68,13 +68,10 @@ class ListViewModel @Inject constructor(
         }
     }
 
-    fun uploadData(
-        list: List<ListEntity>
-
+    suspend fun uploadData(
+        list: List<ListEntity>, callback: (Boolean) -> Unit
     ) {
-        viewModelScope.launch {
-            repository.uploadData(list)
-        }
+        repository.uploadData(list, callback)
     }
 
 
@@ -100,7 +97,11 @@ class ListViewModel @Inject constructor(
         }
     }
 
-
+    suspend fun syncComplete(list: List<ListEntity>) {
+        for (lista in list) {
+            repositoryRoom.updateList(lista.copy(sync = "1"))
+        }
+    }
 }
 
 

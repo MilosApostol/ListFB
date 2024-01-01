@@ -7,19 +7,19 @@ import com.example.listfirebase.data.room.loginregister.UserEntity
 class ListSession {
     var currentList: ListEntity? = null
 
-    fun setUser(user: ListEntity) {
-        this.currentList = user
+    fun setList(list: ListEntity) {
+        this.currentList = list
     }
 
-    fun getUserId(): String {
+    fun getListId(): String {
         return currentList?.id!!
     }
 
-    fun setUserId(newUserId: String) {
-        currentList?.id = newUserId
+    fun getListId(newList: String) {
+        currentList?.id = newList
     }
 
-    fun getUser(): ListEntity {
+    fun getList(): ListEntity {
         return currentList!!
     }
 

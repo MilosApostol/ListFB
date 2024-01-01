@@ -24,7 +24,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material.rememberDismissState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -39,6 +41,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.listfirebase.data.firebasedata.listfirebase.ListViewModel
 import com.example.listfirebase.data.firebasedata.listfirebase.ListEntity
 import com.example.listfirebase.data.firebasedata.items.ItemsViewModel
+import com.example.listfirebase.data.room.additems.ItemsRoomViewModel
+import com.example.listfirebase.data.room.addlist.ListRoomViewModel
 import com.example.listfirebase.nav.Screens
 import com.example.listfirebase.predefinedlook.ItemsList
 
@@ -49,25 +53,47 @@ fun ItemsScreen(
     id: String,
     navController: NavController = rememberNavController(),
     listViewModel: ListViewModel = hiltViewModel(),
-    itemsViewModel: ItemsViewModel = hiltViewModel()
+    itemsViewModel: ItemsViewModel = hiltViewModel(),
+    itemsRoomViewModel: ItemsRoomViewModel = hiltViewModel(),
+    listRoomViewModel: ListRoomViewModel = hiltViewModel()
 ) {
 
-    //Toast.makeText(LocalContext.current, "$id", Toast.LENGTH_LONG).show()
+    Toast.makeText(LocalContext.current, "$id", Toast.LENGTH_LONG).show()
+
+    //firebase
     val itemsFlow = itemsViewModel.getAllItems
     val newItems = itemsFlow.collectAsState(initial = emptyList()).value
     val scope = rememberCoroutineScope()
-    var list: ListEntity = ListEntity()
-
+    var list = ListEntity()
     val parentList = listViewModel.getAllLists.collectAsState(initial = emptyList()).value
-    for (item in parentList) {
-        when (item.id) {
-            id -> {
-                list = item
+    val parentRoomList = listRoomViewModel.getAllLists.collectAsState(emptyList()).value
+
+    val roomFlow = itemsRoomViewModel.getAllItems
+    val roomList = roomFlow.collectAsState(emptyList()).value
+
+    if (listViewModel.isNetworkAvailable()) {
+        for (item in parentList) {
+            when (item.id) {
+                //parent ListID
+                id -> {
+                    list = item
+                }
+            }
+        }
+    } else {
+        for (item in parentRoomList) {
+            when (item.id) {
+                id -> {
+                    list = item
+                }
             }
         }
     }
+    LaunchedEffect(Unit){
 
+    }
 
+    Toast.makeText(LocalContext.current, list.listName, Toast.LENGTH_LONG).show()
 
     val scaffoldState = rememberScaffoldState()
 
@@ -76,7 +102,13 @@ fun ItemsScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text(text = list.listName) },
+                title = {
+                    if (listViewModel.isNetworkAvailable()) {
+                        Text(text = list.listName)
+                    } else {
+                        Text(text = list.listName)
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Menu")
@@ -99,49 +131,96 @@ fun ItemsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            items(newItems.filter { it.itemCreatorId == list.id },
-                key = { item -> item.itemId } // it has to have a key, swipe wouldn't work without it
+            if (listViewModel.isNetworkAvailable()) {
+                items(newItems.filter { it.itemCreatorId == list.id },
+                    key = { item -> item.itemId } // it has to have a key, swipe wouldn't work without it
 
-            ) { item ->
-                val dismissState = androidx.compose.material.rememberDismissState()
+                ) { item ->
+                    val dismissState = rememberDismissState()
 
-                if (dismissState.isDismissed(direction = DismissDirection.EndToStart)) {
-                    Toast.makeText(LocalContext.current, "Delete", Toast.LENGTH_SHORT).show()
-                    itemsViewModel.removeItem(itemId = item.itemId)
-                }
+                    if (dismissState.isDismissed(direction = DismissDirection.EndToStart)) {
+                        Toast.makeText(LocalContext.current, "Delete", Toast.LENGTH_SHORT).show()
+                        itemsViewModel.removeItem(itemId = item.itemId)
+                    }
 
-                SwipeToDismiss(
-                    state = dismissState,
-                    directions = setOf(
-                        DismissDirection.EndToStart
-                    ),
-                    background = {
-                        val color by animateColorAsState(
-                            targetValue =
-                            if (dismissState.dismissDirection ==
-                                DismissDirection.EndToStart
-                            ) Color.Red //red color
-                            else Color.Transparent,
-                            label = ""
-                        )
-                        Box(
-                            Modifier
-                                .fillMaxSize()
-                                .background(color)
-                                .padding(horizontal = 20.dp),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = null,
-                                tint = Color.White
+                    SwipeToDismiss(
+                        state = dismissState,
+                        directions = setOf(
+                            DismissDirection.EndToStart
+                        ),
+                        background = {
+                            val color by animateColorAsState(
+                                targetValue =
+                                if (dismissState.dismissDirection ==
+                                    DismissDirection.EndToStart
+                                ) Color.Red
+                                else Color.Transparent,
+                                label = ""
                             )
-                        }
-                    },
-                    dismissThresholds = { FractionalThreshold(0.5f) },
-                    dismissContent = {
-                        ItemsList(item = item)
-                    })
+                            Box(
+                                Modifier
+                                    .fillMaxSize()
+                                    .background(color)
+                                    .padding(horizontal = 20.dp),
+                                contentAlignment = Alignment.CenterEnd
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            }
+                        },
+                        dismissThresholds = { FractionalThreshold(0.5f) },
+                        dismissContent = {
+                            ItemsList(item = item)
+                        })
+                }
+            } else {
+                items(roomList.filter { it.itemCreatorId == list.id },
+                    key = { item -> item.itemId } // it has to have a key, swipe wouldn't work without it
+
+                ) { item ->
+                    val dismissState = rememberDismissState()
+
+                    if (dismissState.isDismissed(direction = DismissDirection.EndToStart)) {
+                        Toast.makeText(LocalContext.current, "Delete", Toast.LENGTH_SHORT).show()
+                        itemsViewModel.removeItem(itemId = item.itemId)
+                    }
+
+                    SwipeToDismiss(
+                        state = dismissState,
+                        directions = setOf(
+                            DismissDirection.EndToStart
+                        ),
+                        background = {
+                            val color by animateColorAsState(
+                                targetValue =
+                                if (dismissState.dismissDirection ==
+                                    DismissDirection.EndToStart
+                                ) Color.Red
+                                else Color.Transparent,
+                                label = ""
+                            )
+                            Box(
+                                Modifier
+                                    .fillMaxSize()
+                                    .background(color)
+                                    .padding(horizontal = 20.dp),
+                                contentAlignment = Alignment.CenterEnd
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = null,
+                                    tint = Color.White
+                                )
+                            }
+                        },
+                        dismissThresholds = { FractionalThreshold(0.5f) },
+                        dismissContent = {
+                            ItemsList(item = item)
+                        })
+                }
             }
         }
     }

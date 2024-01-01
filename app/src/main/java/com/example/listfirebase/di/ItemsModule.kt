@@ -6,6 +6,7 @@ import com.example.listfirebase.data.firebasedata.items.ItemsViewModel
 import com.example.listfirebase.data.room.additems.ItemsDao
 import com.example.listfirebase.data.room.additems.ItemsRoomRepository
 import com.example.listfirebase.data.room.additems.ItemsRoomViewModel
+import com.example.listfirebase.session.ListSession
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,8 +30,10 @@ class ItemsModule {
 
     @Provides
     @Singleton
-    fun providesItemsRoomViewModel(repository: ItemsRoomRepository) =
-        ItemsRoomViewModel(repository)
+    fun providesItemsRoomViewModel(
+        repository: ItemsRoomRepository,
+        listSession: ListSession) =
+        ItemsRoomViewModel(repository, listSession)
 
     //firebase
 

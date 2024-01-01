@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Job
@@ -41,23 +42,24 @@ fun AppBarView(
             contentDescription = null,
             modifier = Modifier.clickable {
                 onMenuNavClicked()
-            }
+            },
+            tint = Color.Black
         )
         Icon(
             imageVector = Icons.Filled.DeleteForever,
             contentDescription = "Delete",
-            tint = MaterialTheme.colorScheme.primary,
+            tint = Color.Black,
             modifier = Modifier
                 .size(24.dp)
                 .clip(CircleShape)
                 .clickable {
                     onDeleteNavClicked()
-                }
+                },
         )
         Icon(
             imageVector = Icons.Filled.Logout,
             contentDescription = "Logout",
-            tint = MaterialTheme.colorScheme.primary,
+            tint = Color.Black,
             modifier = Modifier
                 .size(24.dp)
                 .clip(CircleShape)

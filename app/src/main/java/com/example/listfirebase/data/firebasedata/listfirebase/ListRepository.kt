@@ -3,19 +3,26 @@ package com.example.listfirebase.data.firebasedata.listfirebase
 import android.os.Parcel
 import com.example.listfirebase.Constants
 import com.example.listfirebase.data.firebasedata.items.ItemsEntity
+import com.example.listfirebase.session.UserSessionManager
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import java.util.UUID
+import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
-class ListRepository() {
+class ListRepository @Inject constructor(val userSessionManager: UserSessionManager) {
 
     private val _list = MutableStateFlow<List<ListEntity>>(emptyList())
     val list: StateFlow<List<ListEntity>> = _list
@@ -61,11 +68,15 @@ class ListRepository() {
         return _listFlow
     }
 
-    suspend fun uploadData(list: List<ListEntity>) {
-       val reference = FirebaseDatabase.getInstance().getReference(Constants.Lists)
-            .child(FirebaseAuth.getInstance().currentUser?.uid ?: "")
-        for (liste in list) {
-            val childRef = reference.setValue(liste).await()
+    suspend fun uploadData(
+        itemsToUpload: List<ListEntity>, callback: (Boolean) -> Unit
+    ) {
+        val reference = FirebaseDatabase.getInstance().getReference(Constants.Lists)
+        for (item in itemsToUpload) {
+            reference.setValue(item).addOnCompleteListener {
+                val success = it.isSuccessful
+                callback(success)
+            }
         }
     }
 

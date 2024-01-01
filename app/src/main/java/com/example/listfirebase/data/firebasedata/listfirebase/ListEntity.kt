@@ -10,5 +10,5 @@ data class ListEntity(
     var id: String = "tururur",
     val listName: String = "",
     val listCreatorId: String = "",
-    val sync: String = "0"
+    val sync: String = "0",
 )

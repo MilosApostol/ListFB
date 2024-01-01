@@ -44,6 +44,7 @@ import androidx.navigation.NavHostController
 import com.example.listfirebase.data.firebasedata.registerlogin.RegisterViewModel
 import com.example.listfirebase.data.room.loginregister.UserEntity
 import com.example.listfirebase.data.room.loginregister.UserViewModel
+import com.example.listfirebase.nav.Screens
 import com.example.listfirebase.predefinedlook.TextFieldLookEmail
 import com.example.listfirebase.predefinedlook.TextFieldLookPassword
 import com.google.firebase.Firebase
@@ -62,9 +63,11 @@ fun RegisterScreenFire(
     var passwordVisible by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    var check by remember { mutableStateOf(false) }
-    val auth = Firebase.auth
-    val key = "prboa"
+    val key = ""
+    if (password.length < 6){
+        Text(text = "At least 6 caracters long",
+            color = Color.Red)
+    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         TopAppBar(title = { Text("RegisterScreen") }, navigationIcon = {
@@ -76,7 +79,6 @@ fun RegisterScreenFire(
             val cardModifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White)
-                .clickable { /* Handle click here */ }
                 .padding(16.dp)
 
             Column(modifier = Modifier.fillMaxSize()) {
@@ -108,6 +110,7 @@ fun RegisterScreenFire(
                         onTextChange = { password = it },
                         onClick = { passwordVisible = !passwordVisible })
                 }
+
                 Button(
                     onClick = {
                         if (email.isEmpty() && password.isEmpty()) {
@@ -122,12 +125,13 @@ fun RegisterScreenFire(
 
                                 } else {
                                     Toast.makeText(context, "ol gud", Toast.LENGTH_LONG).show()
-                                    registerViewModel.onSignUp(
+                                    val reg = registerViewModel.onSignUp(
                                         email,
                                         password,
-                                        navController,
                                         key
                                     )
+                                    navController.navigate(Screens.ListScreenFire.name + "/$key")
+
                                 }
                             }
                         }

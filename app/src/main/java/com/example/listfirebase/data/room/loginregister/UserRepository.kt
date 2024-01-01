@@ -43,27 +43,6 @@ class UserRepository
         return userDao.checkUserExists(email).first()
     }
 
-    suspend fun updateUserId(newUserId: String, oldUserId: String) {
-        userDao.updateUserId(newUserId, oldUserId)
-    }
-
-    suspend fun updateHolderId(username: String): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                val firebaseUserId = userDao.getUserByName(username)
-                val existingUser = userDao.getUserByName(username)
-
-                if (existingUser != null) {
-                    userDao.updateHolderId(existingUser.userId, existingUser.userHolderId)
-                }
-                true
-            } catch (e: Exception) {
-                false
-            }
-        }
-
-    }
-
     //works
     suspend fun updateRoomUserIdAfterLogin(username: String): Boolean {
         return withContext(Dispatchers.IO) {

@@ -30,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -70,13 +71,13 @@ fun LoginFireBase(
 ) {
     val key = "prboa"
     val scope = rememberCoroutineScope()
-    LaunchedEffect(key1 = Unit) {
-        if (registerViewModel.isNetworkAvailable() && registerViewModel.isUserLoggedIn()) {
-            // if you don't sign out user, it will always be something inside of current user, it will always go into listscreen
-            navController.navigate(Screens.ListScreenFire.name + "/$key")
+    val isLoggedInState = registerViewModel.isUserLoggedInState.collectAsState(initial = false)
 
-        } else if (userViewModel.loggingState()) {
+    LaunchedEffect(key1 = Unit) {
+        if (isLoggedInState.value && registerViewModel.isNetworkAvailable()) {
             navController.navigate(Screens.ListScreenFire.name + "/$key")
+        } else if (userViewModel.loggingState()) {
+          navController.navigate(Screens.ListScreenFire.name + "/$key")
         }
     }
     val context = LocalContext.current
@@ -219,7 +220,7 @@ fun LoginFireBase(
                             top = 16.dp, start = 16.dp, end = 16.dp
                         )
                         .height(56.dp)
-                        .align(Alignment.End),
+                        .align(Alignment.CenterHorizontally),
                     content = {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,

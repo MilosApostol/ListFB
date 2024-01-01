@@ -2,6 +2,9 @@ package com.example.listfirebase.data.firebasedata.registerlogin
 
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -15,6 +18,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -28,7 +33,8 @@ class RegisterViewModel @Inject constructor(
     val auth: FirebaseAuth,
     val userSessionManager: UserSessionManager
 ) : ViewModel() {
-
+    private val _isUserLoggedInState = MutableStateFlow(false)
+    val isUserLoggedInState = _isUserLoggedInState.asStateFlow()
     fun isNetworkAvailable(): Boolean {
         val capabilities =
             connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
@@ -53,10 +59,9 @@ class RegisterViewModel @Inject constructor(
     suspend fun onSignUp(
         email: String,
         password: String,
-        navController: NavController,
         key: String
     ) {
-        repository.signUp(email, password, navController, key)
+        repository.signUp(email, password, key)
         val user = UserEntity(
             userEmail = email,
             userPassword = password,
@@ -66,13 +71,16 @@ class RegisterViewModel @Inject constructor(
         userRepository.insertUser(
             user
         )
+        Firebase.auth.currentUser?.uid?.let { userSessionManager.setUserId(it) }
         userSessionManager.apply {
             setUserLoggedIn(true)
+            _isUserLoggedInState.value = true
             userSessionManager.currentUser = user
         }
     }
 
     suspend fun logInAfterOffline(email: String, password: String) {
+        _isUserLoggedInState.value = true
         repository.logIn(email, password)
     }
 
@@ -87,7 +95,7 @@ class RegisterViewModel @Inject constructor(
                 if (user != null) {
                     if (user.userPassword == password) {
                         userSessionManager.currentUser = user
-                        userSessionManager.isUserLoggedIn.value = true
+                        _isUserLoggedInState.value = true
                         userRepository.updateUser(user.copy(isLoggedIn = true))
                         return@withContext repository.logIn(email, password)
                     } else {
@@ -100,20 +108,9 @@ class RegisterViewModel @Inject constructor(
             return@withContext false
         }
     }
-
-    /*else {
-        val user = userRepository.getUserByName(email)
-
-        if (user != null && user.userPassword == password) {
-            userSessionManager.setUser(user)
-            return@withContext true
-        }
-    }
-    return@withContext false
-
-     */
-
     fun signOut() {
         auth.signOut()
+        _isUserLoggedInState.value = false
+
     }
 }

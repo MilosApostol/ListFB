@@ -33,8 +33,9 @@ class ListModule {
     fun providesListRoomViewModel(
         repository: ListRoomRepository,
         userSessionManager: UserSessionManager,
-        listSession: ListSession
-    ) = ListRoomViewModel(repository, userSessionManager, listSession)
+        listSession: ListSession,
+        userRepository: UserRepository
+    ) = ListRoomViewModel(repository, userSessionManager, listSession, userRepository)
 
     @Provides
     @Singleton
@@ -45,8 +46,8 @@ class ListModule {
     //firebase
     @Provides
     @Singleton
-    fun provideListRepository(): ListRepository {
-        return ListRepository()
+    fun provideListRepository(userSessionManager: UserSessionManager): ListRepository {
+        return ListRepository(userSessionManager)
     }
 
     @Provides
