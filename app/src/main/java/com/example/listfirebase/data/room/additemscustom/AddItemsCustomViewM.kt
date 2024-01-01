@@ -24,11 +24,11 @@ constructor(val repository: AddItemsCustomRep)
         }
     }
 
-    lateinit var gettCustomItems: Flow<List<AddItemsData>>
+    lateinit var getCustomItems: Flow<List<AddItemsData>>
 
     init {
         viewModelScope.launch {
-            gettCustomItems = repository.getItems()
+            getCustomItems = repository.getItems()
         }
     }
 

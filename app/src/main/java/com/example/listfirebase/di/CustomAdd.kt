@@ -23,16 +23,22 @@ fun CustomAdd(
     onClick: () -> Unit
 ) {
     Column {
-        Row (modifier = Modifier.padding(8.dp).
-            fillMaxWidth()
-            .clickable { onRowClick() },
-            horizontalArrangement = Arrangement.SpaceBetween){
+        Row(
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+                .clickable { onRowClick() },
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
             Text(
                 text = customItem.title,
                 style = MaterialTheme.typography.titleSmall,
                 maxLines = 1
             )
-            Icon(imageVector = Icons.Default.Delete, contentDescription = null, modifier = Modifier.clickable { onClick() })
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = null,
+                modifier = Modifier.clickable { onClick() })
         }
     }
 }
