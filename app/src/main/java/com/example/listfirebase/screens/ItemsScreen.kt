@@ -107,7 +107,9 @@ fun ItemsScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
+                    IconButton(onClick = { navController.navigateUp()
+
+                    }) {
                         Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Menu")
                     }
                 })

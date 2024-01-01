@@ -21,7 +21,7 @@ fun DrawerItem(
     item: Screen.DrawerScreen,
     onDrawerItemClicked: () -> Unit
 ) {
-    val background = if (selected) Color.DarkGray else Color.White
+    val background = if (selected) Color.Green else Color.White
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(vertical = 16.dp, horizontal = 8.dp)
@@ -29,7 +29,11 @@ fun DrawerItem(
         .clickable {
             onDrawerItemClicked()
         }) {
-        Text(text = item.dTitle, style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = item.dTitle,
+            style = MaterialTheme.typography.headlineMedium,
+            color = Color.Black
+        )
 
     }
 

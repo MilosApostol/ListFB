@@ -41,47 +41,57 @@ fun NavGraph(
                     nullable = false
                 })
         ) {
-            val key  = it.arguments?.getString("key") ?: ""
+            val key = it.arguments?.getString("key") ?: ""
             ListScreenFire(key, navController)
         }
-            composable(
-                Screens.AddListFire.name + "/{id}",
-                arguments = listOf(
-                    navArgument("id") {
-                        type = NavType.StringType
-                        defaultValue = ""
-                        nullable = false
-                    })
-            ) {
-                val id = it.arguments?.getString("id") ?: ""
-                //  val id = if (it.arguments != null) it.arguments!!.getString("id") else ""
-                AddListFire(id = id, navController = navController)
-            }
-            composable(
-                Screens.ItemsScreenFire.name + "/{id}",
-                arguments = listOf(
-                    navArgument("id") {
-                        type = NavType.StringType
-                        defaultValue = ""
-                        nullable = false
-                    })
-            ) {
-                val id = it.arguments?.getString("id") ?: ""
-                ItemsScreen(id = id, navController = navController)
-            }
+        composable(
+            Screens.AddListFire.name + "/{id}",
+            arguments = listOf(
+                navArgument("id") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                    nullable = false
+                })
+        ) {
+            val id = it.arguments?.getString("id") ?: ""
+            //  val id = if (it.arguments != null) it.arguments!!.getString("id") else ""
+            AddListFire(id = id, navController = navController)
+        }
+        composable(
+            Screens.ItemsScreenFire.name + "/{id}",
+            arguments = listOf(
+                navArgument("id") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                    nullable = false
+                })
+        ) {
+            val id = it.arguments?.getString("id") ?: ""
+            ItemsScreen(id = id, navController = navController)
+        }
 
-            composable(
-                Screens.AddItems.name + "/{id}",
-                arguments = listOf(
-                    navArgument("id") {
-                        type = NavType.StringType
-                        defaultValue = ""
-                        nullable = false
-                    })
-            ) {
-                val id = it.arguments?.getString("id") ?: ""
-                AddItems(id = id, navController = navController)
-            }
+        composable(
+            Screens.AddItems.name + "/{id}",
+            arguments = listOf(
+                navArgument("id") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                    nullable = false
+                })
+        ) {
+            val id = it.arguments?.getString("id") ?: ""
+            AddItems(id = id, navController = navController)
+        }
+
+        composable(Screen.DrawerScreen.List.route) {
+            val key = it.arguments?.getString("key") ?: ""
+            ListScreenFire(key, navController)
+        }
+
+        composable(Screen.DrawerScreen.Add.route) {
+            val id = it.arguments?.getString("id") ?: ""
+            AddListFire(id = id, navController = navController)
         }
     }
+}
 
