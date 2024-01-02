@@ -52,14 +52,13 @@ fun Lists(
     {
         if (listViewModel.isNetworkAvailable()) {
             items(
-                listFirebase
+                listFirebase.filter { it.listCreatorId == userId }
             ) { list ->
                 ListItems(
                     list = list,
                     onDeleteClick = {
                         val listKey = list.id
                         Firebase.database.getReference(Constants.Lists)
-                            .child(FirebaseAuth.getInstance().currentUser?.uid ?: "")
                             .child(listKey)
                             .removeValue()
                         listRoomViewModel.removeList(list)

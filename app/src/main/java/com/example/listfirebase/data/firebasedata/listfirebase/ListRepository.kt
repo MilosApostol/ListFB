@@ -30,7 +30,6 @@ class ListRepository @Inject constructor(val userSessionManager: UserSessionMana
     private var job: Job? = null
 
     private val reference = FirebaseDatabase.getInstance().getReference(Constants.Lists)
-        .child(FirebaseAuth.getInstance().currentUser?.uid ?: "")
 
     private val _listFlow = MutableStateFlow<List<ListEntity>>(emptyList())
 

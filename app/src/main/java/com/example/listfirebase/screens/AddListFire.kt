@@ -102,10 +102,6 @@ fun AddListFire(
 
                                     val reference =
                                         FirebaseDatabase.getInstance().getReference(Constants.Lists)
-                                            .child(
-                                                FirebaseAuth.getInstance().currentUser?.uid
-                                                    ?: ""
-                                            )
                                     val key = reference.key!!
                                     try {
                                         val list = ListEntity(

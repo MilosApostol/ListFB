@@ -40,10 +40,6 @@ class ListViewModel @Inject constructor(
 
     val reference =
         FirebaseDatabase.getInstance().getReference(Constants.Lists)
-            .child(
-                FirebaseAuth.getInstance().currentUser?.uid
-                    ?: ""
-            )
 
     fun isNetworkAvailable(): Boolean {
         val capabilities =
