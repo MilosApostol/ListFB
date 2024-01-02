@@ -34,12 +34,4 @@ class MainActivity : BaseCompose() {
             }
         }
     }
-
-    override fun onNetworkAvailable(available: Boolean) {
-        if (available) {
-            //  listViewModel.onNetworkRestored()
-            //      firebaseViewModel.onNetworkRestored()
-        }
-    }
-
 }

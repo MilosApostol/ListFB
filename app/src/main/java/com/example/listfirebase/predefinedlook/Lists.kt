@@ -33,7 +33,8 @@ import com.google.firebase.database.database
 
 @Composable
 fun Lists(
-    lists: List<ListEntity>,
+    listFirebase: List<ListEntity>,
+    listsRoom: List<ListEntity>,
     listViewModel: ListViewModel,
     navController: NavController,
     paddingValues: PaddingValues,
@@ -51,7 +52,8 @@ fun Lists(
     {
         if (listViewModel.isNetworkAvailable()) {
             items(
-                lists.filter { it.listCreatorId == userId }) { list ->
+                listFirebase
+            ) { list ->
                 ListItems(
                     list = list,
                     onDeleteClick = {
@@ -108,7 +110,7 @@ fun Lists(
             }
         } else {
             items(
-                lists){ list ->
+                listsRoom.filter { it.sync == "0" && it.listCreatorId == userId }) { list ->
                 ListItems(
                     list = list,
                     onDeleteClick = {

@@ -84,7 +84,7 @@ fun ListScreenFire(
     val context = LocalContext.current
     //firebase lists
     val listFlow = listViewModel.getAllLists
-    val list = listFlow.collectAsState(initial = emptyList()).value
+    val listFirebase = listFlow.collectAsState(initial = emptyList()).value
 
     //offline lists
     val roomListFlow = listRoomViewModel.getAllLists
@@ -95,7 +95,7 @@ fun ListScreenFire(
     val drawerScaffoldState = rememberScaffoldState()
     val currentRoute = navController.currentDestination?.route
     var userId: String? = ""
-   /*
+
     val itemsToUpload = getItemsToUpload(roomList)
     LaunchedEffect(Unit) {
         if (itemsToUpload.isNotEmpty()) {
@@ -106,12 +106,14 @@ fun ListScreenFire(
             }
         }
     }
-    */
     if (registerViewModel.isNetworkAvailable()) {
         //changing ID of the room databaseID
         LaunchedEffect(key1 = Unit, key2 = FirebaseAuth.getInstance().currentUser) {
+            //setting a user
             userViewModel.getUserId()
+            //
             userViewModel.updateRoomUserIdAfterLogin(Firebase.auth.currentUser?.email.toString()) //setting a roomID == firebaseID
+
             val user = userViewModel.getUserDetails()
             if (user != null) {
                 registerViewModel.logInAfterOffline(user.userEmail, user.userPassword)
@@ -130,6 +132,7 @@ fun ListScreenFire(
         }
     }
     userId = userViewModel.userIdState
+    Toast.makeText(context, "$userId", Toast.LENGTH_LONG).show()
 
     Scaffold(scaffoldState = drawerScaffoldState, topBar = {
         AppBarView(title = "ListScreen", onMenuNavClicked = {
@@ -187,9 +190,9 @@ fun ListScreenFire(
                     )
                 )
             }
-            if (registerViewModel.isNetworkAvailable()) {
-                Lists(
-                    list,
+            Lists(
+                    listFirebase,
+                    roomList,
                     listViewModel,
                     navController,
                     paddingValues,
@@ -197,17 +200,7 @@ fun ListScreenFire(
                     listRoomViewModel,
                     userId
                 )
-            } else {
-                Lists(
-                    roomList,
-                    listViewModel,
-                    navController,
-                    paddingValues,
-                    userViewModel,
-                    listRoomViewModel,
-                    userId,
-                )
-            }
+
         }
     }
 }
