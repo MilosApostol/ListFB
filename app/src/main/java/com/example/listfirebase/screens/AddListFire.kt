@@ -103,36 +103,42 @@ fun AddListFire(
                                     val reference =
                                         FirebaseDatabase.getInstance().getReference(Constants.Lists)
                                     val key = reference.key!!
-                                    try {
-                                        val list = ListEntity(
-                                            listName = listName,
-                                            id = UUID.randomUUID().toString(),
-                                            listCreatorId = Firebase.auth.currentUser?.uid!!,
-                                            sync = "1"
-                                        )
-                                        val newRef = reference.push()
-                                            .setValue(list) { error, ref ->
-                                                val key = ref.key
-                                                list.id = key!!
-
-                                                listViewModel.saveData(ref, list, key) { isSucces ->
-
+                                    val list = ListEntity(
+                                        listName = listName,
+                                        id = UUID.randomUUID().toString(),
+                                        listCreatorId = Firebase.auth.currentUser?.uid!!,
+                                        sync = "1"
+                                    )
+                                    val newRef = reference.push()
+                                        .setValue(list) { error, ref ->
+                                            val key = ref.key
+                                            list.id = key!!
+                                            scope.launch {
+                                                listViewModel.saveData(
+                                                    ref,
+                                                    list,
+                                                    key
+                                                ) { isSucces ->
+                                                    navController.navigate(
+                                                        Screens.ListScreenFire.name
+                                                                + "/$id")
                                                 }
                                             }
-                                        scope.launch {
-                                            if (listRoomViewModel.insertListOnline(list)
-                                            ) {
-
-                                                navController.navigate(
-                                                    Screens.ListScreenFire.name
-                                                            + "/$id"
-                                                )
-                                            }
                                         }
+                                    /*
+                                    scope.launch {
+                                        if (listRoomViewModel.insertListOnline(list)
+                                        ) {
 
-                                    } catch (e: Exception) {
-
+                                            navController.navigate(
+                                                Screens.ListScreenFire.name
+                                                        + "/$id"
+                                            )
+                                        }
                                     }
+
+                                     */
+
                                 } else {
                                     val list = ListEntity(
                                         listName = listName,

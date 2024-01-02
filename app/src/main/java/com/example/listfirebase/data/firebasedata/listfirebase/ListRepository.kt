@@ -1,8 +1,10 @@
 package com.example.listfirebase.data.firebasedata.listfirebase
 
 import android.os.Parcel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.listfirebase.Constants
 import com.example.listfirebase.data.firebasedata.items.ItemsEntity
+import com.example.listfirebase.data.room.addlist.ListDao
 import com.example.listfirebase.session.UserSessionManager
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -22,7 +24,10 @@ import java.util.UUID
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
-class ListRepository @Inject constructor(val userSessionManager: UserSessionManager) {
+class ListRepository @Inject constructor(
+    val userSessionManager: UserSessionManager,
+    val dao: ListDao
+) {
 
     private val _list = MutableStateFlow<List<ListEntity>>(emptyList())
     val list: StateFlow<List<ListEntity>> = _list
@@ -79,14 +84,16 @@ class ListRepository @Inject constructor(val userSessionManager: UserSessionMana
         }
     }
 
-    fun saveData(
+    suspend fun saveData(
         ref: DatabaseReference,
         list: ListEntity,
         key: String,
         callback: (Boolean) -> Unit
     ) {
-        ref.setValue(list).addOnCompleteListener { task ->
-            list.copy(id = key)
+        val updateList = list.copy(id = key)
+        dao.insertList(list = updateList)
+
+        ref.setValue(updateList).addOnCompleteListener { task ->
             val success = task.isSuccessful
             callback(success)
         }

@@ -89,7 +89,6 @@ fun ListScreenFire(
     //offline lists
     val roomListFlow = listRoomViewModel.getAllLists
     val roomList = roomListFlow.collectAsState(initial = emptyList()).value
-
     val scope = rememberCoroutineScope()
     val id = 0
     val drawerScaffoldState = rememberScaffoldState()
@@ -111,7 +110,7 @@ fun ListScreenFire(
         LaunchedEffect(key1 = Unit, key2 = FirebaseAuth.getInstance().currentUser) {
             //setting a user
             userViewModel.getUserId()
-            //
+            //does ex
             userViewModel.updateRoomUserIdAfterLogin(Firebase.auth.currentUser?.email.toString()) //setting a roomID == firebaseID
 
             val user = userViewModel.getUserDetails()
@@ -132,7 +131,6 @@ fun ListScreenFire(
         }
     }
     userId = userViewModel.userIdState
-    Toast.makeText(context, "$userId", Toast.LENGTH_LONG).show()
 
     Scaffold(scaffoldState = drawerScaffoldState, topBar = {
         AppBarView(title = "ListScreen", onMenuNavClicked = {
@@ -191,15 +189,16 @@ fun ListScreenFire(
                 )
             }
             Lists(
-                    listFirebase,
-                    roomList,
-                    listViewModel,
-                    navController,
-                    paddingValues,
-                    userViewModel,
-                    listRoomViewModel,
-                    userId
-                )
+                listFirebase,
+                roomList,
+                listViewModel,
+                navController,
+                paddingValues,
+                userViewModel,
+                listRoomViewModel,
+                userId,
+                context
+            )
 
         }
     }

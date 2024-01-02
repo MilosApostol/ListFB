@@ -1,5 +1,6 @@
 package com.example.listfirebase.predefinedlook
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -40,7 +41,8 @@ fun Lists(
     paddingValues: PaddingValues,
     userViewModel: UserViewModel,
     listRoomViewModel: ListRoomViewModel,
-    userId: String?
+    userId: String?,
+    context: Context
 ) {
 
     LazyColumn(
@@ -59,8 +61,7 @@ fun Lists(
                     onDeleteClick = {
                         val listKey = list.id
                         Firebase.database.getReference(Constants.Lists)
-                            .child(listKey)
-                            .removeValue()
+                            .child(listKey).removeValue()
                         listRoomViewModel.removeList(list)
                     },
                     onTextClick = {
@@ -87,7 +88,7 @@ fun Lists(
                             PersonItem(
                                 personName = "Rename",
                                 dropdownItems = listOf(DropDownItem("Rename")),
-                                onItemClick = { /* Handle rename action here */ },
+                                onItemClick = {  },
                                 id = list.id
                             )
                             PersonItem(

@@ -71,7 +71,7 @@ class ListViewModel @Inject constructor(
     }
 
 
-    fun saveData(
+    suspend fun saveData(
         reference: DatabaseReference,
         list: ListEntity,
         key: String,

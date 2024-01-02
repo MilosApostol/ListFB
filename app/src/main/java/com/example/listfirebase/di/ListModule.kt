@@ -47,8 +47,8 @@ class ListModule {
     //firebase
     @Provides
     @Singleton
-    fun provideListRepository(userSessionManager: UserSessionManager): ListRepository {
-        return ListRepository(userSessionManager)
+    fun provideListRepository(userSessionManager: UserSessionManager, dao: ListDao): ListRepository {
+        return ListRepository(userSessionManager, dao)
     }
 
     @Provides
