@@ -82,9 +82,11 @@ fun ListScreenFire(
 ) {
 
     val context = LocalContext.current
+    //firebase lists
     val listFlow = listViewModel.getAllLists
     val list = listFlow.collectAsState(initial = emptyList()).value
 
+    //offline lists
     val roomListFlow = listRoomViewModel.getAllLists
     val roomList = roomListFlow.collectAsState(initial = emptyList()).value
 
@@ -93,6 +95,7 @@ fun ListScreenFire(
     val drawerScaffoldState = rememberScaffoldState()
     val currentRoute = navController.currentDestination?.route
     var userId: String? = ""
+   /*
     val itemsToUpload = getItemsToUpload(roomList)
     LaunchedEffect(Unit) {
         if (itemsToUpload.isNotEmpty()) {
@@ -103,6 +106,7 @@ fun ListScreenFire(
             }
         }
     }
+    */
     if (registerViewModel.isNetworkAvailable()) {
         //changing ID of the room databaseID
         LaunchedEffect(key1 = Unit, key2 = FirebaseAuth.getInstance().currentUser) {

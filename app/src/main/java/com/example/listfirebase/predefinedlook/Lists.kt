@@ -108,7 +108,7 @@ fun Lists(
             }
         } else {
             items(
-                lists.filter { it.listCreatorId == userId }) { list ->
+                lists){ list ->
                 ListItems(
                     list = list,
                     onDeleteClick = {
