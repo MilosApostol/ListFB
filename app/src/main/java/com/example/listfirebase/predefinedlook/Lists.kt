@@ -143,7 +143,7 @@ fun Lists(
                             PersonItem(
                                 personName = "Rename",
                                 dropdownItems = listOf(DropDownItem("Rename")),
-                                onItemClick = { /* Handle rename action here */ },
+                                onItemClick = { },
                                 id = list.id
                             )
                             PersonItem(

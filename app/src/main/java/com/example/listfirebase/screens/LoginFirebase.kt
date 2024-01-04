@@ -191,14 +191,10 @@ fun LoginFireBase(
                                         )
                                     userViewModel.updateHolderId(email)
                                     if (user) {
-                                        navController.navigate(
+                                        navController.popBackStack(
                                             Screens.ListScreenFire.name +
-                                                    "/$key"
-                                        ) {
-                                            popUpTo(Screens.ListScreenFire.name) {
-                                                inclusive = true
-                                            }
-                                        }
+                                                    "/$key", inclusive = false
+                                        )
                                     } else {
                                         Toast.makeText(
                                             context, "Something is wrong",
@@ -212,14 +208,10 @@ fun LoginFireBase(
                                         registerViewModel.logIn(email, password)
                                     if (firebaseLog) {
 
-                                        navController.navigate(
+                                        navController.popBackStack(
                                             Screens.ListScreenFire.name +
-                                                    "/$key"
-                                        ) {
-                                            popUpTo(Screens.ListScreenFire.name) {
-                                                inclusive = true
-                                            }
-                                        }
+                                                    "/$key", inclusive = false
+                                        )
 
                                     } else {
                                         Toast.makeText(

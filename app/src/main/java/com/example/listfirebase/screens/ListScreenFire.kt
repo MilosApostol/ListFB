@@ -67,6 +67,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.exp
@@ -96,7 +97,7 @@ fun ListScreenFire(
     var userId: String? = ""
 
     val itemsToUpload = getItemsToUpload(roomList)
-    LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) { //WHEN ITEM IN THE parents change  launched-effect will be called
         if (itemsToUpload.isNotEmpty()) {
             listViewModel.uploadData(itemsToUpload) {
                 scope.launch {
