@@ -20,11 +20,9 @@ class AddItemsViewModel @Inject constructor(
     private val repository: AddItemsRepository,
 ) : ViewModel() {
 
-    private val _searchText = MutableStateFlow("")
-    val searchText = _searchText.asStateFlow()
+    private val searchText = MutableStateFlow("")
 
-    private var _selectedItem = mutableStateListOf<AddItemsData?>(null)
-    val selectedItem: List<AddItemsData?> get() = _selectedItem
+    private var selectedItem = mutableStateListOf<AddItemsData?>(null)
 
 
     private val _addItem = MutableStateFlow(listOf<AddItemsData>())
@@ -66,13 +64,13 @@ class AddItemsViewModel @Inject constructor(
                 it.price = items.price
                 it.listCreatorId = items.listCreatorId
             } ?: run {
-                _selectedItem.addAll(listOf(items))
+                selectedItem.addAll(listOf(items))
             }
         }
     }
 
     fun onSearchChange(text: String) {
-        _searchText.value = text
+        searchText.value = text
     }
 
     fun saveItems(ref: DatabaseReference, items: ItemsEntity, key: String) {

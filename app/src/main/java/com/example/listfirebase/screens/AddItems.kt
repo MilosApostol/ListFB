@@ -42,7 +42,7 @@ import com.example.listfirebase.data.firebasedata.items.ItemsViewModel
 import com.example.listfirebase.data.firebasedata.listfirebase.ListViewModel
 import com.example.listfirebase.data.room.additems.ItemsRoomViewModel
 import com.example.listfirebase.data.room.additemscustom.AddItemsCustomViewM
-import com.example.listfirebase.di.CustomAdd
+import com.example.listfirebase.predefinedlook.CustomAdd
 import com.example.listfirebase.nav.Screens
 import com.example.listfirebase.predefinedlook.SearchItems
 import com.google.firebase.Firebase

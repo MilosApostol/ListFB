@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.listfirebase.Constants
 import com.example.listfirebase.R
 import com.example.listfirebase.data.firebasedata.listfirebase.ListEntity
 import com.example.listfirebase.data.firebasedata.listfirebase.ListViewModel
@@ -66,6 +67,7 @@ import com.google.android.play.integrity.internal.e
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -81,7 +83,8 @@ fun ListScreenFire(
     registerViewModel: RegisterViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel()
 ) {
-
+    val referenceSync =
+        FirebaseDatabase.getInstance().getReference(Constants.Lists)
     val context = LocalContext.current
     //firebase lists
     val listFlow = listViewModel.getAllLists
@@ -90,6 +93,7 @@ fun ListScreenFire(
     //offline lists
     val roomListFlow = listRoomViewModel.getAllLists
     val roomList = roomListFlow.collectAsState(initial = emptyList()).value
+
     val scope = rememberCoroutineScope()
     val id = 0
     val drawerScaffoldState = rememberScaffoldState()
@@ -97,15 +101,21 @@ fun ListScreenFire(
     var userId: String? = ""
 
     val itemsToUpload = getItemsToUpload(roomList)
-    LaunchedEffect(Unit) { //WHEN ITEM IN THE parents change  launched-effect will be called
-        if (itemsToUpload.isNotEmpty()) {
-            listViewModel.uploadData(itemsToUpload) {
-                scope.launch {
-                    listViewModel.syncComplete(list = roomList)
+    LaunchedEffect(itemsToUpload) { //WHEN ITEM IN THE parents change  launched-effect will be called
+        if (listViewModel.isNetworkAvailable()) {
+            for(item in itemsToUpload){
+                val reference = referenceSync.child(item.id)
+                reference.setValue(item.copy(sync = "1")) {_, ref ->
+                    scope.launch {
+                        listViewModel.uploadData(item, reference){
+                        }
+                    }
                 }
             }
+
         }
     }
+
     if (registerViewModel.isNetworkAvailable()) {
         //changing ID of the room databaseID
         LaunchedEffect(key1 = Unit, key2 = FirebaseAuth.getInstance().currentUser) {

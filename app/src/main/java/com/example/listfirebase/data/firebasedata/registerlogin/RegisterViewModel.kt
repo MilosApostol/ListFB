@@ -47,15 +47,6 @@ class RegisterViewModel @Inject constructor(
 //update I  dont think this works
     // if the user is logged, if yes set userID to firebaseUserId , then you can find your user in ROOM
 
-    fun isUserLoggedIn(): Boolean {
-        return if (auth.currentUser != null) {
-            userSessionManager.setUserId(Firebase.auth.currentUser!!.uid)
-            true
-        } else {
-            false
-        }
-    }
-
     suspend fun onSignUp(
         email: String,
         password: String,
@@ -63,7 +54,7 @@ class RegisterViewModel @Inject constructor(
         navController: NavController
     ): Boolean {
         return withContext(Dispatchers.IO) {
-        repository.signUp(email, password, key, navController)
+            repository.signUp(email, password, key, navController)
             val user = UserEntity(
                 userEmail = email,
                 userPassword = password,
@@ -80,6 +71,7 @@ class RegisterViewModel @Inject constructor(
             return@withContext false
         }
     }
+
     suspend fun logInAfterOffline(email: String, password: String) {
         _isUserLoggedInState.value = true
         repository.logIn(email, password)
@@ -108,10 +100,5 @@ class RegisterViewModel @Inject constructor(
             }
             return@withContext false
         }
-    }
-    fun signOut() {
-        auth.signOut()
-        _isUserLoggedInState.value = false
-
     }
 }

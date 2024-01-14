@@ -38,20 +38,11 @@ class ListViewModel @Inject constructor(
     val repositoryRoom: ListRoomRepository
 ) : ViewModel() {
 
-    val reference =
-        FirebaseDatabase.getInstance().getReference(Constants.Lists)
-
     fun isNetworkAvailable(): Boolean {
         val capabilities =
             connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
         return capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ?: false
     }
-
-    private val _listFlow = MutableStateFlow<List<ListEntity>>(emptyList())
-    val listFlow: StateFlow<List<ListEntity>> get() = _listFlow.asStateFlow()
-
-    private val _itemsFlow = MutableStateFlow<List<ItemsEntity>>(emptyList())
-    val itemsFlow: StateFlow<List<ItemsEntity>> get() = _itemsFlow.asStateFlow()
 
     lateinit var getAllLists: Flow<List<ListEntity>>
 
@@ -65,9 +56,9 @@ class ListViewModel @Inject constructor(
     }
 
     suspend fun uploadData(
-        list: List<ListEntity>, callback: (Boolean) -> Unit
+        list: ListEntity, reference: DatabaseReference, callback: (Boolean) -> Unit
     ) {
-        repository.uploadData(list, callback)
+        repository.uploadData(list, reference, callback)
     }
 
 

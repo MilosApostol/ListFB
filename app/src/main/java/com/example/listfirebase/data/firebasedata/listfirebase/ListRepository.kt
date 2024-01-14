@@ -29,14 +29,12 @@ class ListRepository @Inject constructor(
     val dao: ListDao
 ) {
 
-    private val _list = MutableStateFlow<List<ListEntity>>(emptyList())
-    val list: StateFlow<List<ListEntity>> = _list
 
     private var job: Job? = null
 
     private val reference = FirebaseDatabase.getInstance().getReference(Constants.Lists)
 
-    private val _listFlow = MutableStateFlow<List<ListEntity>>(emptyList())
+    private val listFlow = MutableStateFlow<List<ListEntity>>(emptyList())
 
 
     fun readData() {
@@ -47,7 +45,7 @@ class ListRepository @Inject constructor(
                     val list: ListEntity? = itemSnapshot.getValue(ListEntity::class.java)
                     list?.let { listNew.add(it) }
                 }
-                _listFlow.value = listNew
+                listFlow.value = listNew
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -61,7 +59,6 @@ class ListRepository @Inject constructor(
 
             current.invokeOnCompletion {
                 if (it is CancellationException) {
-                    // Handle cancellation logic, e.g., log a message
                 }
                 reference.removeEventListener(valueEventListener)
             }
@@ -69,18 +66,17 @@ class ListRepository @Inject constructor(
     }
 
     suspend fun getLists(): StateFlow<List<ListEntity>> {
-        return _listFlow
+        return listFlow
     }
 
     suspend fun uploadData(
-        itemsToUpload: List<ListEntity>, callback: (Boolean) -> Unit
+        itemsToUpload: ListEntity, ref: DatabaseReference, callback: (Boolean) -> Unit
     ) {
-        val reference = FirebaseDatabase.getInstance().getReference(Constants.Lists)
-        for (item in itemsToUpload) {
-            reference.setValue(item).addOnCompleteListener {
-                val success = it.isSuccessful
-                callback(success)
-            }
+        val syncUpdate = itemsToUpload.copy(sync = "1")
+        dao.updateList(syncUpdate)
+        ref.setValue(itemsToUpload).addOnCompleteListener {
+            val success = it.isSuccessful
+            callback(success)
         }
     }
 
@@ -98,17 +94,6 @@ class ListRepository @Inject constructor(
             callback(success)
         }
     }
-
-    fun saveItems(ref: DatabaseReference, list: ItemsEntity, key: String) {
-        ref.setValue(list).addOnCompleteListener { task ->
-            list.copy(itemId = key)
-            if (task.isSuccessful) {
-
-            } else {
-            }
-        }
-    }
-
     fun deleteAll() {
         reference.removeValue()
     }
