@@ -74,7 +74,7 @@ class ListRepository @Inject constructor(
     ) {
         val syncUpdate = itemsToUpload.copy(sync = "1")
         dao.updateList(syncUpdate)
-        ref.setValue(itemsToUpload).addOnCompleteListener {
+        ref.setValue(syncUpdate).addOnCompleteListener {
             val success = it.isSuccessful
             callback(success)
         }

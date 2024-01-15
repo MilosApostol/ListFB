@@ -33,7 +33,7 @@ fun ListItems(
         modifier
             .fillMaxWidth()
             .background(Color.White)
-            .clickable { /* Handle click here */ }
+            .clickable { }
             .padding(8.dp), elevation = 8.dp, shape = RoundedCornerShape(16.dp)
 
     ) {

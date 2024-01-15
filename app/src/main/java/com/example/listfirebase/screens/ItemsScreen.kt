@@ -50,7 +50,7 @@ import com.example.listfirebase.predefinedlook.ItemsList
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ItemsScreen(
-    id: String,
+    id: String = "",
     navController: NavController = rememberNavController(),
     listViewModel: ListViewModel = hiltViewModel(),
     itemsViewModel: ItemsViewModel = hiltViewModel(),

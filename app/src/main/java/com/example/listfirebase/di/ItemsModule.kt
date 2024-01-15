@@ -32,6 +32,7 @@ class ItemsModule {
     @Singleton
     fun providesItemsRoomViewModel(
         repository: ItemsRoomRepository,
+        itemsRoomRepository: ItemsRoomRepository,
         listSession: ListSession) =
         ItemsRoomViewModel(repository, listSession)
 

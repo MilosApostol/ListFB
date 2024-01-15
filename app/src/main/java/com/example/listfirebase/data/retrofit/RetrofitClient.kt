@@ -1,4 +1,4 @@
-package com.example.listfirebase.data.firebasedata.additemsapi
+package com.example.listfirebase.data.retrofit
 
 import com.example.listfirebase.Constants
 import com.google.gson.GsonBuilder

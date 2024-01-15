@@ -61,21 +61,8 @@ class ItemsRepository() {
     fun removeItem(itemId: String) {
         databaseReference.child(itemId).removeValue()
     }
-
-    fun removeItems(itemCreatorId: String) {
-        val query = databaseReference.orderByChild("itemCreatorId")
-            .equalTo(itemCreatorId)
-        query.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                for (itemSnapshot in snapshot.children) {
-                    itemSnapshot.ref.removeValue()
-                }
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
-            }
-        })
+    fun deleteAll() {
+        databaseReference.removeValue()
     }
 
     fun updateItem(reference: DatabaseReference, itemsEntity: ItemsEntity, key: String) {

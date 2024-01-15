@@ -33,6 +33,7 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.listfirebase.Constants
 import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsData
@@ -57,7 +58,7 @@ import java.util.UUID
 @Composable
 fun AddItems(
     id: String,
-    navController: NavController = rememberNavController(),
+    navController: NavHostController = rememberNavController(),
     addItemsViewModel: AddItemsViewModel = hiltViewModel(),
     itemsViewModel: ItemsViewModel = hiltViewModel(),
     itemsRoomViewModel: ItemsRoomViewModel = hiltViewModel(),
@@ -76,13 +77,14 @@ fun AddItems(
     val allItems = listsFlow.collectAsState(initial = emptyList()).value
     val filteredItems = allItems.filter { it.title.contains(text, ignoreCase = true) }
 
+    val getAll = addItemsViewModel.allItems.collectAsState(initial = listOf()).value
 
     // val list = listItemsViewModel.getList()
 
     if (listViewModel.isNetworkAvailable()) {
         LaunchedEffect(Unit) {
             scope.launch {
-                addItemsViewModel.getItems()
+           //     addItemsViewModel.getItems()
             }
         }
     }
@@ -126,6 +128,7 @@ fun AddItems(
                         itemsRoomViewModel,
                         scope
                     )
+                    navController.popBackStack(Screens.ItemsScreenFire.name, inclusive = false)
                     active = false
                 } else {
                     val item = AddItemsData(
@@ -134,6 +137,7 @@ fun AddItems(
                         listCreatorId = id
                     )
                     addItemsCustomViewM.addItem(item)
+                    navController.popBackStack(Screens.ItemsScreenFire.name, inclusive = false)
                     active = false
                 }
             },
@@ -160,8 +164,7 @@ fun AddItems(
                 }
             }) {
             LazyColumn {
-
-                items(allItems) { items ->
+                items(getAll) { items ->
                     CustomAdd(customItem = items, onClick = {
                         addItemsCustomViewM.removeItem(items)
                     }, onRowClick = {
@@ -196,7 +199,7 @@ fun AddItems(
                             itemsRoomViewModel,
                             scope
                         )
-                    })
+                        })
                 }
             }
         }
@@ -229,9 +232,9 @@ fun saveData(
         itemsViewModel.updateData(ref, newItem, key)
         scope.launch {
             itemsRoomViewModel.insertItemsOnline(newItem)
+
         }
-    }
-    navController.navigate(Screens.ItemsScreenFire.name + "/$id") {
+        navController.popBackStack(Screens.ItemsScreenFire.name + "/$id", inclusive = false)
     }
 }
 

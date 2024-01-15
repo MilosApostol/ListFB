@@ -2,6 +2,7 @@ package com.example.listfirebase.data
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsDao
 import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsData
 import com.example.listfirebase.data.firebasedata.items.ItemsEntity
 import com.example.listfirebase.data.firebasedata.listfirebase.ListEntity
@@ -26,6 +27,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun listDao(): ListDao
     abstract fun itemDao(): ItemsDao
     abstract fun addItemsDao(): AddItemsCustomDao
+    abstract fun addItemsFireDao(): AddItemsDao
 
     companion object {
         val DATABASE = "database"

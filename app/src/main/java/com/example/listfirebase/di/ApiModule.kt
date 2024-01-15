@@ -1,20 +1,13 @@
 package com.example.listfirebase.di
 
+
 import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
+import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsDao
 import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsRepository
-import com.example.listfirebase.data.firebasedata.additemsapi.ApiItemsClient
-import com.example.listfirebase.data.firebasedata.additemsapi.ApiService
-import com.example.listfirebase.data.firebasedata.listfirebase.ListRepository
-import com.example.listfirebase.data.firebasedata.listfirebase.ListViewModel
-import com.example.listfirebase.data.firebasedata.items.ItemsRepository
-import com.example.listfirebase.data.room.addlist.ListDao
-import com.example.listfirebase.data.room.addlist.ListRoomRepository
-import com.example.listfirebase.data.room.addlist.ListRoomViewModel
-import com.example.listfirebase.data.room.loginregister.UserRepository
-import com.example.listfirebase.session.ListSession
-import com.example.listfirebase.session.UserSessionManager
+import com.example.listfirebase.data.retrofit.ApiItemsClient
+import com.example.listfirebase.data.retrofit.ApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,8 +26,8 @@ object ApiModule {
 
     @Provides
     @Singleton
-    fun providesAddItemsRepository(apiService: ApiService): AddItemsRepository {
-        return AddItemsRepository(apiService)
+    fun providesAddItemsRepository(apiService: ApiService, dao: AddItemsDao): AddItemsRepository {
+        return AddItemsRepository(apiService, dao )
     }
 
 

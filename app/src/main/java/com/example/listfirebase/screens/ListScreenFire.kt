@@ -50,6 +50,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.listfirebase.Constants
 import com.example.listfirebase.R
+import com.example.listfirebase.data.firebasedata.items.ItemsViewModel
 import com.example.listfirebase.data.firebasedata.listfirebase.ListEntity
 import com.example.listfirebase.data.firebasedata.listfirebase.ListViewModel
 import com.example.listfirebase.data.firebasedata.registerlogin.RegisterViewModel
@@ -81,7 +82,8 @@ fun ListScreenFire(
     listViewModel: ListViewModel = hiltViewModel(),
     listRoomViewModel: ListRoomViewModel = hiltViewModel(),
     registerViewModel: RegisterViewModel = hiltViewModel(),
-    userViewModel: UserViewModel = hiltViewModel()
+    userViewModel: UserViewModel = hiltViewModel(),
+    itemsViewModel: ItemsViewModel = hiltViewModel()
 ) {
     val referenceSync =
         FirebaseDatabase.getInstance().getReference(Constants.Lists)
@@ -137,7 +139,7 @@ fun ListScreenFire(
         }
     } else {
         //if network is off, taking the ID for saved user
-        LaunchedEffect(key1 = Unit) {
+        LaunchedEffect(!registerViewModel.isNetworkAvailable()) {
             userViewModel.getUserId()
         }
     }
@@ -152,6 +154,8 @@ fun ListScreenFire(
             }
         }, onDeleteNavClicked = {
             listViewModel.deleteAll()
+            itemsViewModel.deleteAll()
+
         }, onLogoutClicked = {
             scope.launch {
                 userViewModel.logout()
@@ -205,6 +209,7 @@ fun ListScreenFire(
                 listViewModel,
                 navController,
                 paddingValues,
+                itemsViewModel,
                 userViewModel,
                 listRoomViewModel,
                 userId,

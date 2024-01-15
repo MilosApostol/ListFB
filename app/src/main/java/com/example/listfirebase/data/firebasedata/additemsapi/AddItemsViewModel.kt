@@ -1,12 +1,14 @@
 package com.example.listfirebase.data.firebasedata.additemsapi
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.listfirebase.data.firebasedata.items.ItemsEntity
 import com.google.firebase.database.DatabaseReference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,8 +26,18 @@ class AddItemsViewModel @Inject constructor(
 
     private var selectedItem = mutableStateListOf<AddItemsData?>(null)
 
-
     private val _addItem = MutableStateFlow(listOf<AddItemsData>())
+
+    val allItems: Flow<List<AddItemsData>> = repository.getAllItems()
+
+    fun getItems(){
+        viewModelScope.launch {
+            repository.getAllItems()
+        }
+    }
+    init {
+        fetchItemsList()
+    }
 
     val addItem = searchText
         .combine(_addItem) { text, addItem ->
@@ -42,10 +54,17 @@ class AddItemsViewModel @Inject constructor(
             SharingStarted.WhileSubscribed(5000),
             _addItem.value
         )
-
+/*
     fun getItems() {
         viewModelScope.launch {
             _addItem.value = repository.getItems()
+        }
+    }
+
+ */
+    private fun fetchItemsList() {
+        viewModelScope.launch {
+            repository.getItems()
         }
     }
 

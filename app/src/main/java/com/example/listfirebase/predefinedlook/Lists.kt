@@ -1,6 +1,7 @@
 package com.example.listfirebase.predefinedlook
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.navigation.NavController
 import com.example.listfirebase.Constants
+import com.example.listfirebase.data.firebasedata.items.ItemsViewModel
 import com.example.listfirebase.data.firebasedata.listfirebase.ListEntity
 import com.example.listfirebase.data.firebasedata.listfirebase.ListViewModel
 import com.example.listfirebase.data.room.addlist.ListRoomViewModel
@@ -39,6 +41,7 @@ fun Lists(
     listViewModel: ListViewModel,
     navController: NavController,
     paddingValues: PaddingValues,
+    itemsViewModel: ItemsViewModel,
     userViewModel: UserViewModel,
     listRoomViewModel: ListRoomViewModel,
     userId: String?,
@@ -58,12 +61,6 @@ fun Lists(
             ) { list ->
                 ListItems(
                     list = list,
-                    onDeleteClick = {
-                        val listKey = list.id
-                        Firebase.database.getReference(Constants.Lists)
-                            .child(listKey).removeValue()
-                        listRoomViewModel.removeList(list)
-                    },
                     onTextClick = {
                         val id = list.id
                         navController.navigate(Screens.ItemsScreenFire.name + "/$id")
@@ -95,12 +92,12 @@ fun Lists(
                                 personName = "Delete",
                                 dropdownItems = listOf(DropDownItem("Delete")),
                                 onItemClick = {
-                                    val listKey = list.id
-                                    Firebase.database.getReference(Constants.Lists)
-                                        .child(FirebaseAuth.getInstance().currentUser?.uid ?: "")
-                                        .child(listKey)
-                                        .removeValue()
-                                    listRoomViewModel.removeList(list)
+                                        val listKey = list.id
+                                        val itemsKey = list.listCreatorId
+                                        Firebase.database.getReference(Constants.Lists)
+                                            .child(listKey).removeValue()
+                                        listRoomViewModel.removeList(list)
+                                        itemsViewModel.removeItem(itemsKey)
                                 },
                                 id = list.id
                             )
@@ -110,7 +107,7 @@ fun Lists(
             }
         } else {
             items(
-                listsRoom.filter { it.sync == "0" && it.listCreatorId == userId }) { list ->
+                listsRoom.filter { it.listCreatorId == userId }) { list ->
                 ListItems(
                     list = list,
                     onDeleteClick = {
