@@ -65,8 +65,4 @@ class ListModule {
         userRepository,
         listRoomRepository
     )
-
-    @Provides
-    @Singleton
-    fun providesListItemsViewModel(listSession: ListSession) = ListItemsViewModel(listSession)
 }
