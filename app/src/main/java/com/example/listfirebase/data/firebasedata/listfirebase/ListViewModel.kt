@@ -47,6 +47,10 @@ class ListViewModel @Inject constructor(
     lateinit var getAllLists: Flow<List<ListEntity>>
 
     init {
+        refreshLists()
+    }
+
+    fun refreshLists() {
         viewModelScope.launch {
             getAllLists = flow {
                 repository.readData()

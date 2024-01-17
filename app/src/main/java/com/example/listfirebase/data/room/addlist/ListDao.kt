@@ -22,7 +22,7 @@ abstract class ListDao {
     @Delete
     abstract suspend fun deleteList(list: ListEntity)
 
-    @Query("SELECT * FROM `list_table`")
+    @Query("SELECT * FROM list_table")
     abstract fun getAll(): Flow<List<ListEntity>>
 
     @Query("SELECT * FROM `list_table` WHERE id = :listId")

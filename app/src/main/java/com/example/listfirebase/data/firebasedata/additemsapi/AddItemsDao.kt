@@ -15,6 +15,6 @@ interface AddItemsDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertItem(item: AddItemsData)
-    @Query("SELECT * FROM `add_items_table` ORDER BY price DESC")
+    @Query("SELECT * FROM AddItemsData ORDER BY price DESC")
     fun getAllItems(): Flow<List<AddItemsData>>
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.DismissDirection
+import androidx.compose.material.DismissState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.Scaffold
@@ -29,6 +30,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,13 +42,19 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.listfirebase.Constants
+import com.example.listfirebase.data.firebasedata.items.ItemsEntity
 import com.example.listfirebase.data.firebasedata.listfirebase.ListViewModel
 import com.example.listfirebase.data.firebasedata.listfirebase.ListEntity
 import com.example.listfirebase.data.firebasedata.items.ItemsViewModel
-import com.example.listfirebase.data.room.additems.ItemsRoomViewModel
+import com.example.listfirebase.data.room.items.ItemsRoomViewModel
 import com.example.listfirebase.data.room.addlist.ListRoomViewModel
 import com.example.listfirebase.nav.Screens
 import com.example.listfirebase.predefinedlook.ItemsList
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.database.database
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
@@ -59,16 +69,35 @@ fun ItemsScreen(
 ) {
 
     //firebase
-    val itemsFlow = itemsViewModel.getAllItems
-    val newItems = itemsFlow.collectAsState(initial = emptyList()).value
+    val newItems = itemsViewModel.getAllItems.collectAsState(initial = emptyList()).value
+    val roomItems = itemsRoomViewModel.getAllItems.collectAsState(emptyList()).value
     val scope = rememberCoroutineScope()
     var list = ListEntity()
     var offList = ListEntity()
     val parentList = listViewModel.getAllLists.collectAsState(initial = emptyList()).value
+    val dismissStates = remember { mutableStateMapOf<String, DismissState>() }
 
-    val items = itemsFlow.collectAsState(initial = emptyList()).value
-    val roomListFlow = listRoomViewModel.getAllLists
-    val roomList = roomListFlow.collectAsState(initial = emptyList()).value
+    val roomList = listRoomViewModel.getAllLists.collectAsState(initial = emptyList()).value
+    val ref = Firebase.database.getReference(Constants.Items)
+        .child(Firebase.auth.currentUser?.uid!!)
+    val itemsToUpload = getItemsToUpload(roomItems)
+    val context = LocalContext.current
+    LaunchedEffect(itemsToUpload) {
+        if (listViewModel.isNetworkAvailable()) {
+            for (item in itemsToUpload) {
+                val reference = ref.child(item.itemId)
+                reference.setValue(item.copy(sync = "1")) { _, ref ->
+                    scope.launch {
+                        itemsViewModel.syncUpdate(reference, item) {
+                            Toast.makeText(context,  "sync", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+
+        }
+
+    }
 
 
     if (listViewModel.isNetworkAvailable()) {
@@ -89,7 +118,7 @@ fun ItemsScreen(
             }
         }
     }
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
 
     }
     val scaffoldState = rememberScaffoldState()
@@ -107,7 +136,8 @@ fun ItemsScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp()
+                    IconButton(onClick = {
+                        navController.navigateUp()
 
                     }) {
                         Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Menu")
@@ -119,7 +149,7 @@ fun ItemsScreen(
                 onClick = {
                     if (listViewModel.isNetworkAvailable()) {
                         navController.navigate(Screens.AddItems.name + "/${list.id}")
-                    }else{
+                    } else {
                         navController.navigate(Screens.AddItems.name + "/${offList.id}")
                     }
                 },
@@ -134,13 +164,13 @@ fun ItemsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+
             if (listViewModel.isNetworkAvailable()) {
-                items(newItems.filter { it.itemCreatorId == list.id },
-                    key = { item -> item.itemId } // it has to have a key, swipe wouldn't work without it
 
-                ) { item ->
-                    val dismissState = rememberDismissState()
-
+                items(newItems.filter { it.itemCreatorId == list.id }, key = { item -> item.itemId }) { item ->
+                    val dismissState = dismissStates.getOrPut(item.itemId) {
+                        rememberDismissState()
+                    }
                     if (dismissState.isDismissed(direction = DismissDirection.EndToStart)) {
                         Toast.makeText(LocalContext.current, "Delete", Toast.LENGTH_SHORT).show()
                         itemsViewModel.removeItem(itemId = item.itemId)
@@ -181,15 +211,14 @@ fun ItemsScreen(
                         })
                 }
             } else {
-                items(items.filter { it.itemCreatorId == list.id },
+                items(roomItems.filter { it.itemCreatorId == list.id },
                     key = { item -> item.itemId } // it has to have a key, swipe wouldn't work without it
-
                 ) { item ->
-                    val dismissState = rememberDismissState()
-
+                    val dismissState = dismissStates.getOrPut(item.itemId) {
+                        rememberDismissState()
+                    }
                     if (dismissState.isDismissed(direction = DismissDirection.EndToStart)) {
-                        Toast.makeText(LocalContext.current, "Delete", Toast.LENGTH_SHORT).show()
-                        itemsViewModel.removeItem(itemId = item.itemId)
+                        itemsRoomViewModel.removeItem(item)
                     }
 
                     SwipeToDismiss(
@@ -229,3 +258,7 @@ fun ItemsScreen(
         }
     }
 }
+
+    fun getItemsToUpload(itemsList: List<ItemsEntity>): List<ItemsEntity> {
+        return itemsList.filter { it.sync == "0" }
+    }

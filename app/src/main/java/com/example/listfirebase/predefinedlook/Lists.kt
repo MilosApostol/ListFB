@@ -107,7 +107,7 @@ fun Lists(
             }
         } else {
             items(
-                listsRoom.filter { it.listCreatorId == userId }) { list ->
+                listsRoom.filter { it.listCreatorId == userId } + listFirebase.filter { it.listCreatorId == userId }) { list ->
                 ListItems(
                     list = list,
                     onDeleteClick = {

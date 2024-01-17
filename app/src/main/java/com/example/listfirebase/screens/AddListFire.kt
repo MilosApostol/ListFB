@@ -121,24 +121,11 @@ fun AddListFire(
                                                 ) { isSucces ->
                                                     navController.navigate(
                                                         Screens.ListScreenFire.name
-                                                                + "/$id")
+                                                                + "/$id"
+                                                    )
                                                 }
                                             }
                                         }
-                                    /*
-                                    scope.launch {
-                                        if (listRoomViewModel.insertListOnline(list)
-                                        ) {
-
-                                            navController.navigate(
-                                                Screens.ListScreenFire.name
-                                                        + "/$id"
-                                            )
-                                        }
-                                    }
-
-                                     */
-
                                 } else {
                                     val list = ListEntity(
                                         listName = listName,
@@ -146,18 +133,12 @@ fun AddListFire(
                                         sync = "0"
                                     )
                                     scope.launch {
-
-                                        if (listRoomViewModel.insertListOffline(
-                                                list
-                                            )
-                                        ) {
-                                            navController.navigate(
-                                                Screens.ListScreenFire.name
-                                                        + "/$id"
-                                            )
-
-                                        }
+                                        listRoomViewModel.insertListOffline(list)
+                                        navController.navigate(
+                                            Screens.ListScreenFire.name
+                                                    + "/$id")
                                     }
+
                                 }
                             } else {
                                 Toast.makeText(context, "add value", Toast.LENGTH_LONG).show()

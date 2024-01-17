@@ -150,7 +150,7 @@ fun LoginFireBase(
                 val cardModifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White)
-                    .clickable { /* Handle click here */ }
+                    .clickable {  }
                     .padding(16.dp)
                 Card(
                     modifier = cardModifier, elevation = 8.dp, shape = RoundedCornerShape(16.dp)
@@ -235,7 +235,7 @@ fun LoginFireBase(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                "Log In", color = Color.White, fontWeight = FontWeight.Bold
+                                "Log In", color = Color.White, fontWeight = FontWeight.Bold,
                             )
                             Icon(
                                 imageVector = Icons.Default.ArrowForward,
@@ -288,10 +288,7 @@ fun LoginFireBase(
             }
         }
     }
-
 }
-
-
 @Preview
 @Composable
 fun login() {

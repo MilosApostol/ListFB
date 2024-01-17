@@ -16,13 +16,19 @@ class AddItemsRepository @Inject constructor(
     val dao: AddItemsDao
 ) {
 
+    private var isDataFetched = false
+
 
     fun getAllItems(): Flow<List<AddItemsData>> {
         return dao.getAllItems()
     }
+
     suspend fun getItems() = withContext(Dispatchers.IO) {
-        val itemsList = apiService.getItems()
-        dao.insertItems(itemsList)
+        if (!isDataFetched) {
+            val itemsList = apiService.getItems()
+            dao.insertItems(itemsList)
+            isDataFetched = true
+        }
     }
 
     suspend fun getItem(title: String): AddItemsData {

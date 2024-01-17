@@ -14,4 +14,5 @@ data class ItemsEntity(
     var itemCreatorId: String = "",
     var itemName: String = "",
     var description: String = "",
+    var sync: String = "0"
 )

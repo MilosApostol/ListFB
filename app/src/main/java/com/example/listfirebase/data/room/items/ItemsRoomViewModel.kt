@@ -1,4 +1,4 @@
-package com.example.listfirebase.data.room.additems
+package com.example.listfirebase.data.room.items
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,13 +19,12 @@ class ItemsRoomViewModel @Inject constructor(
     val listSession: ListSession
 ) : ViewModel() {
 
-    val _getAllItems = MutableStateFlow<List<ItemsEntity>>(emptyList())
-    val getAllItems: StateFlow<List<ItemsEntity>> get() = _getAllItems.asStateFlow()
+    val getAllItems = MutableStateFlow<List<ItemsEntity>>(emptyList())
 
     init {
         viewModelScope.launch {
             itemsRoomRepository.getItems().collect {
-                _getAllItems.value = it
+                getAllItems.value = it
             }
         }
     }

@@ -6,8 +6,9 @@ import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsDao
 import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsData
 import com.example.listfirebase.data.firebasedata.items.ItemsEntity
 import com.example.listfirebase.data.firebasedata.listfirebase.ListEntity
-import com.example.listfirebase.data.room.additems.ItemsDao
+import com.example.listfirebase.data.room.items.ItemsDao
 import com.example.listfirebase.data.room.additemscustom.AddItemsCustomDao
+import com.example.listfirebase.data.room.additemscustom.AddItemsEntity
 import com.example.listfirebase.data.room.addlist.ListDao
 import com.example.listfirebase.data.room.loginregister.LoginDao
 import com.example.listfirebase.data.room.loginregister.UserEntity
@@ -17,8 +18,9 @@ import com.example.listfirebase.data.room.loginregister.UserEntity
         UserEntity::class,
         ListEntity::class,
         ItemsEntity::class,
-        AddItemsData::class],
-    version = 4,
+        AddItemsData::class,
+        AddItemsEntity::class],
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

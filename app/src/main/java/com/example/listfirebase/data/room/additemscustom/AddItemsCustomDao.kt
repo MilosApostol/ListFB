@@ -13,16 +13,16 @@ import kotlinx.coroutines.flow.Flow
 abstract class AddItemsCustomDao() {
 
     @Query("SELECT * FROM `add_items_table`")
-    abstract fun getAll(): Flow<List<AddItemsData>>
+    abstract fun getAll(): Flow<List<AddItemsEntity>>
 
 
     @Query("SELECT * FROM `add_items_table` WHERE id = :id")
-    abstract fun getItemById(id: String): Flow<AddItemsData>
+    abstract fun getItemById(id: String): Flow<AddItemsEntity>
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun insertItem(item: AddItemsData)
+    abstract suspend fun insertItem(item: AddItemsEntity)
 
     @Delete
-    abstract suspend fun deleteItem(item: AddItemsData)
+    abstract suspend fun deleteItem(item: AddItemsEntity)
 }

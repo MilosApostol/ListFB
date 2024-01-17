@@ -2,10 +2,9 @@ package com.example.listfirebase.di
 
 import com.example.listfirebase.data.AppDatabase
 import com.example.listfirebase.data.firebasedata.items.ItemsRepository
-import com.example.listfirebase.data.firebasedata.items.ItemsViewModel
-import com.example.listfirebase.data.room.additems.ItemsDao
-import com.example.listfirebase.data.room.additems.ItemsRoomRepository
-import com.example.listfirebase.data.room.additems.ItemsRoomViewModel
+import com.example.listfirebase.data.room.items.ItemsDao
+import com.example.listfirebase.data.room.items.ItemsRoomRepository
+import com.example.listfirebase.data.room.items.ItemsRoomViewModel
 import com.example.listfirebase.session.ListSession
 import dagger.Module
 import dagger.Provides
@@ -40,6 +39,6 @@ class ItemsModule {
 
     @Provides
     @Singleton
-    fun providesItemsRepository(): ItemsRepository = ItemsRepository()
+    fun providesItemsRepository(dao: ItemsDao): ItemsRepository = ItemsRepository(dao)
 
 }

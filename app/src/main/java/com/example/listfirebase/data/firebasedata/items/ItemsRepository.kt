@@ -1,6 +1,7 @@
 package com.example.listfirebase.data.firebasedata.items
 
 import com.example.listfirebase.Constants
+import com.example.listfirebase.data.room.items.ItemsDao
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.database.DataSnapshot
@@ -11,9 +12,10 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 
-class ItemsRepository() {
+class ItemsRepository @Inject constructor(val dao: ItemsDao) {
 
     private val databaseReference: DatabaseReference =
         FirebaseDatabase.getInstance().getReference(Constants.Items)
@@ -72,6 +74,16 @@ class ItemsRepository() {
 
             } else {
             }
+        }
+    }
+    suspend fun syncUpdate(
+        itemsToUpload: ItemsEntity, ref: DatabaseReference, callback: (Boolean) -> Unit
+    ) {
+        val syncUpdate = itemsToUpload.copy(sync = "1")
+        dao.updateItems(syncUpdate)
+        ref.setValue(syncUpdate).addOnCompleteListener {
+            val success = it.isSuccessful
+            callback(success)
         }
     }
 }

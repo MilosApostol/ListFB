@@ -2,7 +2,7 @@ package com.example.listfirebase.data.firebasedata.items
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.listfirebase.data.room.additems.ItemsRoomRepository
+import com.example.listfirebase.data.room.items.ItemsRoomRepository
 import com.google.firebase.database.DatabaseReference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -48,9 +48,15 @@ class ItemsViewModel @Inject constructor(
         }
     }
 
-        fun updateData(reference: DatabaseReference, items: ItemsEntity, key: String) {
-            viewModelScope.launch {
-                repository.updateItem(reference, items, key)
-            }
+    fun updateData(reference: DatabaseReference, items: ItemsEntity, key: String) {
+        viewModelScope.launch {
+            repository.updateItem(reference, items, key)
         }
     }
+
+    fun syncUpdate(reference: DatabaseReference, items: ItemsEntity, callback: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            repository.syncUpdate(items, reference, callback)
+        }
+    }
+}

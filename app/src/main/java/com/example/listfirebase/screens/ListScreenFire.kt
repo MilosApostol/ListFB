@@ -88,13 +88,11 @@ fun ListScreenFire(
     val referenceSync =
         FirebaseDatabase.getInstance().getReference(Constants.Lists)
     val context = LocalContext.current
-    //firebase lists
-    val listFlow = listViewModel.getAllLists
-    val listFirebase = listFlow.collectAsState(initial = emptyList()).value
 
+    //firebase lists
+    val listFirebase by listViewModel.getAllLists.collectAsState(initial = emptyList())
     //offline lists
-    val roomListFlow = listRoomViewModel.getAllLists
-    val roomList = roomListFlow.collectAsState(initial = emptyList()).value
+    val roomList = listRoomViewModel.getAllLists.collectAsState(initial = emptyList()).value
 
     val scope = rememberCoroutineScope()
     val id = 0
@@ -102,14 +100,14 @@ fun ListScreenFire(
     val currentRoute = navController.currentDestination?.route
     var userId: String? = ""
 
-    val itemsToUpload = getItemsToUpload(roomList)
+    val itemsToUpload = getListToUpload(roomList)
     LaunchedEffect(itemsToUpload) { //WHEN ITEM IN THE parents change  launched-effect will be called
         if (listViewModel.isNetworkAvailable()) {
-            for(item in itemsToUpload){
+            for (item in itemsToUpload) {
                 val reference = referenceSync.child(item.id)
-                reference.setValue(item.copy(sync = "1")) {_, ref ->
+                reference.setValue(item.copy(sync = "1")) { _, ref ->
                     scope.launch {
-                        listViewModel.uploadData(item, reference){
+                        listViewModel.uploadData(item, reference) {
                         }
                     }
                 }
@@ -155,6 +153,7 @@ fun ListScreenFire(
         }, onDeleteNavClicked = {
             listViewModel.deleteAll()
             itemsViewModel.deleteAll()
+            listViewModel.refreshLists()
 
         }, onLogoutClicked = {
             scope.launch {
@@ -220,7 +219,6 @@ fun ListScreenFire(
     }
 }
 
-
-fun getItemsToUpload(localList: List<ListEntity>): List<ListEntity> {
+private fun getListToUpload(localList: List<ListEntity>): List<ListEntity> {
     return localList.filter { it.sync == "0" }
 }

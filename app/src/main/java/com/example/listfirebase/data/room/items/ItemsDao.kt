@@ -1,4 +1,4 @@
-package com.example.listfirebase.data.room.additems
+package com.example.listfirebase.data.room.items
 
 import androidx.room.Dao
 import androidx.room.Delete

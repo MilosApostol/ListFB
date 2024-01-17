@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.listfirebase.data.firebasedata.items.ItemsEntity
+import com.example.listfirebase.data.retrofit.ApiItemsClient.apiService
 import com.google.firebase.database.DatabaseReference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,13 +32,11 @@ class AddItemsViewModel @Inject constructor(
 
     val allItems: Flow<List<AddItemsData>> = repository.getAllItems()
 
-    fun getItems(){
+
+     fun fetchItems() {
         viewModelScope.launch {
-            repository.getAllItems()
+            repository.getItems()
         }
-    }
-    init {
-        fetchItemsList()
     }
 
     val addItem = searchText
@@ -54,14 +54,6 @@ class AddItemsViewModel @Inject constructor(
             SharingStarted.WhileSubscribed(5000),
             _addItem.value
         )
-/*
-    fun getItems() {
-        viewModelScope.launch {
-            _addItem.value = repository.getItems()
-        }
-    }
-
- */
     private fun fetchItemsList() {
         viewModelScope.launch {
             repository.getItems()

@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsData
 import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsRepository
+import com.example.listfirebase.data.firebasedata.items.ItemsEntity
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 @HiltViewModel
@@ -15,24 +17,25 @@ class AddItemsCustomViewM @Inject
 constructor(val repository: AddItemsCustomRep)
     : ViewModel() {
 
-        private var _selectedItem = mutableStateListOf<AddItemsData>()
-    val selectedItem: List<AddItemsData> get() = _selectedItem
+        private var selectedItem = mutableStateListOf<AddItemsEntity>()
 
-    fun addItem(item: AddItemsData){
+    fun addItem(item: AddItemsEntity){
         viewModelScope.launch {
             repository.insertCustomItem(item)
         }
     }
 
-    lateinit var getCustomItems: Flow<List<AddItemsData>>
+    val getCustomItems = MutableStateFlow<List<AddItemsEntity>>(emptyList())
 
     init {
         viewModelScope.launch {
-            getCustomItems = repository.getItems()
+            repository.getItems().collect{
+                getCustomItems.value
+            }
         }
     }
 
-    fun addToSelectedItems(items: AddItemsData) {
+    fun addToSelectedItems(items: AddItemsEntity) {
         viewModelScope.launch(Dispatchers.IO) {
             val existingItem = selectedItem.find { it.title == items.title }
             existingItem?.let {
@@ -41,12 +44,12 @@ constructor(val repository: AddItemsCustomRep)
                 it.price = items.price
                 it.id = items.id
             } ?: run {
-                _selectedItem.addAll(listOf(items))
+                selectedItem.addAll(listOf(items))
             }
         }
     }
 
-    fun removeItem(item: AddItemsData) {
+    fun removeItem(item: AddItemsEntity) {
         viewModelScope.launch(Dispatchers.IO) {
             repository.deleteItem(item)
         }

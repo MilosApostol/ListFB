@@ -41,8 +41,9 @@ import com.example.listfirebase.data.firebasedata.additemsapi.AddItemsViewModel
 import com.example.listfirebase.data.firebasedata.items.ItemsEntity
 import com.example.listfirebase.data.firebasedata.items.ItemsViewModel
 import com.example.listfirebase.data.firebasedata.listfirebase.ListViewModel
-import com.example.listfirebase.data.room.additems.ItemsRoomViewModel
+import com.example.listfirebase.data.room.items.ItemsRoomViewModel
 import com.example.listfirebase.data.room.additemscustom.AddItemsCustomViewM
+import com.example.listfirebase.data.room.additemscustom.AddItemsEntity
 import com.example.listfirebase.predefinedlook.CustomAdd
 import com.example.listfirebase.nav.Screens
 import com.example.listfirebase.predefinedlook.SearchItems
@@ -70,24 +71,17 @@ fun AddItems(
     val scope = rememberCoroutineScope()
     val key = ""
 
-    var items = addItemsViewModel.addItem.collectAsState()
+   // val items = addItemsViewModel.addItem.collectAsState(emptyList()).value
 
     //get all custom items from before
-    val listsFlow = addItemsCustomViewM.getCustomItems
-    val allItems = listsFlow.collectAsState(initial = emptyList()).value
-    val filteredItems = allItems.filter { it.title.contains(text, ignoreCase = true) }
+    val customItems = addItemsCustomViewM.getCustomItems.collectAsState(initial = emptyList()).value
 
     val getAll = addItemsViewModel.allItems.collectAsState(initial = listOf()).value
+    //doesn't allow repeating titles
+    val filteredItems = getAll
+        .distinctBy { it.title }
+        .filter { it.title.contains(text, ignoreCase = true) }
 
-    // val list = listItemsViewModel.getList()
-
-    if (listViewModel.isNetworkAvailable()) {
-        LaunchedEffect(Unit) {
-            scope.launch {
-           //     addItemsViewModel.getItems()
-            }
-        }
-    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -114,12 +108,12 @@ fun AddItems(
             },
             onSearch = {
                 if (listViewModel.isNetworkAvailable()) {
-                    val item = AddItemsData(
+                    val itemsCustom = AddItemsEntity(
                         title = text,
                         id = UUID.randomUUID().toString(),
                         listCreatorId = id
                     )
-                    addItemsCustomViewM.addItem(item)
+                    addItemsCustomViewM.addItem(itemsCustom)
                     saveData(
                         itemName = text,
                         id,
@@ -131,13 +125,22 @@ fun AddItems(
                     navController.popBackStack(Screens.ItemsScreenFire.name, inclusive = false)
                     active = false
                 } else {
-                    val item = AddItemsData(
+                    val item = AddItemsEntity(
                         title = text,
                         id = UUID.randomUUID().toString(),
                         listCreatorId = id
                     )
                     addItemsCustomViewM.addItem(item)
-                    navController.popBackStack(Screens.ItemsScreenFire.name, inclusive = false)
+                    val newItem = ItemsEntity(
+                        itemName = text,
+                        itemId = UUID.randomUUID().toString(),
+                        itemCreatorId = id,
+                        sync = "0"
+                    )
+                    scope.launch {
+                        itemsRoomViewModel.insertItemsOnline(newItem)
+                        navController.popBackStack(Screens.ItemsScreenFire.name, inclusive = false)
+                    }
                     active = false
                 }
             },
@@ -164,11 +167,11 @@ fun AddItems(
                 }
             }) {
             LazyColumn {
-                items(getAll) { items ->
+                items(customItems) { items ->
                     CustomAdd(customItem = items, onClick = {
-                        addItemsCustomViewM.removeItem(items)
+                       addItemsCustomViewM.removeItem(items)
                     }, onRowClick = {
-                        addItemsCustomViewM.addToSelectedItems(items)
+                      addItemsCustomViewM.addToSelectedItems(items)
                         saveData(
                             itemName = items.title,
                             id,
@@ -187,7 +190,7 @@ fun AddItems(
                     .fillMaxSize()
                     .wrapContentHeight(Alignment.Top)
             ) {
-                items(items.value) { item ->
+                items(filteredItems) { item ->
                     SearchItems(itemsData = item, onClick = {
                         addItemsViewModel.addToSelectedItems(item)
                         active = false
@@ -199,7 +202,7 @@ fun AddItems(
                             itemsRoomViewModel,
                             scope
                         )
-                        })
+                    })
                 }
             }
         }
@@ -223,6 +226,7 @@ fun saveData(
         itemName = itemName,
         itemId = UUID.randomUUID().toString(),
         itemCreatorId = id,
+        sync = "1"
     )
     val key = ref.key!!
     val newValue = ref.push()
