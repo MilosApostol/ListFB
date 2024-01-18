@@ -1,5 +1,7 @@
 package com.example.listfirebase.screens
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +30,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
@@ -70,12 +73,11 @@ fun AddItems(
     var active by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val key = ""
-
-   // val items = addItemsViewModel.addItem.collectAsState(emptyList()).value
+    val context = LocalContext.current
+    // val items = addItemsViewModel.addItem.collectAsState(emptyList()).value
 
     //get all custom items from before
     val customItems = addItemsCustomViewM.getCustomItems.collectAsState(initial = emptyList()).value
-
     val getAll = addItemsViewModel.allItems.collectAsState(initial = listOf()).value
     //doesn't allow repeating titles
     val filteredItems = getAll
@@ -104,7 +106,8 @@ fun AddItems(
             query = text,
             onQueryChange = {
                 text = it
-                addItemsViewModel.onSearchChange(text)
+              //  addItemsViewModel.onSearchChange(text)
+              //  addItemsCustomViewM.onSearchChange(text)
             },
             onSearch = {
                 if (listViewModel.isNetworkAvailable()) {
@@ -169,9 +172,9 @@ fun AddItems(
             LazyColumn {
                 items(customItems) { items ->
                     CustomAdd(customItem = items, onClick = {
-                       addItemsCustomViewM.removeItem(items)
+                        addItemsCustomViewM.removeItem(items)
                     }, onRowClick = {
-                      addItemsCustomViewM.addToSelectedItems(items)
+                        addItemsCustomViewM.addToSelectedItems(items)
                         saveData(
                             itemName = items.title,
                             id,

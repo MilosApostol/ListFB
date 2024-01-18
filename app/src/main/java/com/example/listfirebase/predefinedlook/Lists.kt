@@ -106,8 +106,12 @@ fun Lists(
                 }
             }
         } else {
-            items(
-                listsRoom.filter { it.listCreatorId == userId } + listFirebase.filter { it.listCreatorId == userId }) { list ->
+            val distinctLists = (listsRoom + listFirebase).distinctBy { it.id }
+            val filteredLists = distinctLists.filter { list ->
+                list.listCreatorId == userId
+            }
+
+            items(filteredLists){list ->
                 ListItems(
                     list = list,
                     onDeleteClick = {

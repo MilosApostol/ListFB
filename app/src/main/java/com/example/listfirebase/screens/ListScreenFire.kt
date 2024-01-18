@@ -151,9 +151,12 @@ fun ListScreenFire(
                 }
             }
         }, onDeleteNavClicked = {
-            listViewModel.deleteAll()
-            itemsViewModel.deleteAll()
-            listViewModel.refreshLists()
+            if (listViewModel.isNetworkAvailable()) {
+                Toast.makeText(context, "Click", Toast.LENGTH_SHORT).show()
+                listViewModel.deleteAll()
+                itemsViewModel.deleteAll()
+                listViewModel.refreshLists()
+            }
 
         }, onLogoutClicked = {
             scope.launch {
